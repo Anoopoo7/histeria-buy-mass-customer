@@ -127,14 +127,35 @@ export class LocationService {
   /**
    * Option C — Manual Address Entry
    */
-  setManualLocation(details: { locality: string; city: string; postalCode?: string; label?: string }): void {
-    // Check if entered city matches any preset coordinates
-    const matchedPreset = KERALA_CITY_PRESETS.find(
-      (p) => p.name.toLowerCase().includes(details.city.toLowerCase()) || details.city.toLowerCase().includes(p.name.toLowerCase()),
-    );
+  setManualLocation(details: {
+    locality: string;
+    city: string;
+    postalCode?: string;
+    label?: string;
+    latitude?: number;
+    longitude?: number;
+  }): void {
+    let lat: number;
+    let lng: number;
 
-    const lat = matchedPreset ? matchedPreset.lat : 9.9312;
-    const lng = matchedPreset ? matchedPreset.lng : 76.2673;
+    if (
+      details.latitude !== undefined &&
+      details.longitude !== undefined &&
+      !isNaN(details.latitude) &&
+      !isNaN(details.longitude)
+    ) {
+      lat = details.latitude;
+      lng = details.longitude;
+    } else {
+      // Check if entered city matches any preset coordinates
+      const matchedPreset = KERALA_CITY_PRESETS.find(
+        (p) =>
+          p.name.toLowerCase().includes(details.city.toLowerCase()) ||
+          details.city.toLowerCase().includes(p.name.toLowerCase()),
+      );
+      lat = matchedPreset ? matchedPreset.lat : 9.9312;
+      lng = matchedPreset ? matchedPreset.lng : 76.2673;
+    }
 
     const updated: CustomerLocation = {
       latitude: lat,
@@ -142,7 +163,7 @@ export class LocationService {
       addressLabel: details.label || `${details.locality}, ${details.city}`,
       locality: details.locality,
       city: details.city,
-      district: matchedPreset?.district,
+      district: details.city,
       state: 'Kerala',
       postalCode: details.postalCode,
       radiusKm: this._radiusKm(),

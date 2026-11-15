@@ -49,6 +49,23 @@ describe('LocationService', () => {
     expect(service.isLocationSet()).toBeTrue();
   });
 
+  it('should support manual address entry with custom lat and long', () => {
+    service.setManualLocation({
+      locality: 'Marine Drive',
+      city: 'Kochi',
+      postalCode: '682031',
+      latitude: 9.9754,
+      longitude: 76.2758,
+    });
+    const loc = service.currentLocation();
+    expect(loc.latitude).toBe(9.9754);
+    expect(loc.longitude).toBe(76.2758);
+    expect(loc.city).toBe('Kochi');
+    expect(loc.locality).toBe('Marine Drive');
+    expect(loc.source).toBe('manual');
+    expect(service.isLocationSet()).toBeTrue();
+  });
+
   it('should manage saved addresses (add, select, delete)', () => {
     const initialCount = service.savedAddresses().length;
     const added = service.saveAddress({

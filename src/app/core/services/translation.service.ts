@@ -38,6 +38,9 @@ export const TRANSLATIONS: TranslationDictionary = {
   loc_locality: { en: 'Locality / Area', ml: 'പ്രദേശം / നാട്' },
   loc_city: { en: 'City / Town', ml: 'നഗരം' },
   loc_pincode: { en: 'PIN Code', ml: 'പിൻകോഡ്' },
+  loc_latitude: { en: 'Latitude', ml: 'ലാറ്റിറ്റ്യൂഡ് (Latitude)' },
+  loc_longitude: { en: 'Longitude', ml: 'ലോംഗിറ്റ്യൂഡ് (Longitude)' },
+  loc_coordinates_label: { en: 'GPS Coordinates (Optional)', ml: 'ജിപിഎസ് കോർഡിനേറ്റുകൾ (ഐച്ഛികം)' },
   loc_save_address: { en: 'Save & Continue', ml: 'സംരക്ഷിച്ച് മുന്നോട്ട് പോകുക' },
 
   // Search

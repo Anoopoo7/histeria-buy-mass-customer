@@ -204,10 +204,37 @@ import { RadiusSelectorComponent } from '../../../../shared/ui/radius-selector/r
             />
           </div>
 
+          <!-- Latitude & Longitude (Manual Coordinates) -->
+          <div class="bm-coords-group">
+            <span class="bm-coords-label">{{ t('loc_coordinates_label') }}</span>
+            <div class="bm-coords-row">
+              <div class="bm-field bm-col-half">
+                <label class="bm-label">{{ t('loc_latitude') }}</label>
+                <input
+                  type="number"
+                  step="any"
+                  class="bm-input"
+                  [(ngModel)]="manualLat"
+                  placeholder="e.g. 9.9312"
+                />
+              </div>
+              <div class="bm-field bm-col-half">
+                <label class="bm-label">{{ t('loc_longitude') }}</label>
+                <input
+                  type="number"
+                  step="any"
+                  class="bm-input"
+                  [(ngModel)]="manualLng"
+                  placeholder="e.g. 76.2673"
+                />
+              </div>
+            </div>
+          </div>
+
           <button
             type="button"
             class="bm-btn-primary bm-full-width"
-            [disabled]="!manualCity.trim()"
+            [disabled]="!isManualFormValid()"
             (click)="submitManualLocation()"
           >
             <lucide-icon [img]="CheckIcon" [size]="18"></lucide-icon>
@@ -463,6 +490,32 @@ import { RadiusSelectorComponent } from '../../../../shared/ui/radius-selector/r
       gap: 4px;
     }
 
+    .bm-coords-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--bm-color-border);
+    }
+
+    .bm-coords-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--bm-color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .bm-coords-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .bm-col-half {
+      min-width: 0;
+    }
+
     .bm-label {
       font-size: 12px;
       font-weight: 600;
@@ -612,6 +665,8 @@ export class LocationPageComponent implements OnInit, AfterViewInit, OnDestroy {
   manualLocality = '';
   manualCity = '';
   manualPincode = '';
+  manualLat: number | null = null;
+  manualLng: number | null = null;
 
   private mapInstance: any = null;
   private markerInstance: any = null;
@@ -621,6 +676,8 @@ export class LocationPageComponent implements OnInit, AfterViewInit, OnDestroy {
     if (loc.latitude && loc.longitude) {
       this.selectedLat.set(loc.latitude);
       this.selectedLng.set(loc.longitude);
+      this.manualLat = loc.latitude;
+      this.manualLng = loc.longitude;
       this.manualLocality = loc.locality || '';
       this.manualCity = loc.city || '';
       this.manualPincode = loc.postalCode || '';
@@ -660,6 +717,8 @@ export class LocationPageComponent implements OnInit, AfterViewInit, OnDestroy {
   applyPreset(lat: number, lng: number, name: string): void {
     this.selectedLat.set(lat);
     this.selectedLng.set(lng);
+    this.manualLat = lat;
+    this.manualLng = lng;
     this.manualCity = name;
     this.manualLocality = name;
     this.detectedAddressLabel.set(name);
@@ -674,24 +733,54 @@ export class LocationPageComponent implements OnInit, AfterViewInit, OnDestroy {
   confirmMapLocation(): void {
     const label = this.detectedAddressLabel() || this.manualCity || 'Selected Location';
     this.locationService.setCoordinates(this.selectedLat(), this.selectedLng(), label, 'map');
-    if (this.manualCity) {
+    if (this.manualCity || (this.selectedLat() && this.selectedLng())) {
       this.locationService.setManualLocation({
-        locality: this.manualLocality || this.manualCity,
-        city: this.manualCity,
+        locality: this.manualLocality || this.manualCity || label,
+        city: this.manualCity || label,
         postalCode: this.manualPincode,
+        latitude: this.selectedLat(),
+        longitude: this.selectedLng(),
       });
     }
     this.toast.success('Location set successfully!');
     this.router.navigate(['/home']);
   }
 
+  isManualFormValid(): boolean {
+    const hasCity = Boolean(this.manualCity.trim());
+    const hasValidCoords =
+      this.manualLat !== null &&
+      this.manualLng !== null &&
+      !isNaN(Number(this.manualLat)) &&
+      !isNaN(Number(this.manualLng));
+    return hasCity || hasValidCoords;
+  }
+
   submitManualLocation(): void {
-    if (!this.manualCity.trim()) return;
+    if (!this.isManualFormValid()) return;
+
+    const lat =
+      this.manualLat !== null && !isNaN(Number(this.manualLat))
+        ? Number(this.manualLat)
+        : undefined;
+    const lng =
+      this.manualLng !== null && !isNaN(Number(this.manualLng))
+        ? Number(this.manualLng)
+        : undefined;
+
+    const city =
+      this.manualCity.trim() ||
+      (lat !== undefined && lng !== undefined
+        ? `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)})`
+        : 'Selected Location');
+    const locality = this.manualLocality.trim() || city;
 
     this.locationService.setManualLocation({
-      locality: this.manualLocality.trim() || this.manualCity.trim(),
-      city: this.manualCity.trim(),
+      locality,
+      city,
       postalCode: this.manualPincode.trim(),
+      latitude: lat,
+      longitude: lng,
     });
     this.toast.success('Address saved!');
     this.router.navigate(['/home']);
@@ -767,6 +856,8 @@ export class LocationPageComponent implements OnInit, AfterViewInit, OnDestroy {
         const lng = Number(evt.latLng.lng().toFixed(6));
         this.selectedLat.set(lat);
         this.selectedLng.set(lng);
+        this.manualLat = lat;
+        this.manualLng = lng;
         this.reverseGeocode(lat, lng);
       }
     });
@@ -777,6 +868,8 @@ export class LocationPageComponent implements OnInit, AfterViewInit, OnDestroy {
         const lng = Number(evt.latLng.lng().toFixed(6));
         this.selectedLat.set(lat);
         this.selectedLng.set(lng);
+        this.manualLat = lat;
+        this.manualLng = lng;
         this.markerInstance.setPosition({ lat, lng });
         this.reverseGeocode(lat, lng);
       }
