@@ -1,0 +1,90 @@
+@use 'styles/tokens';
+@use 'styles/mixins';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  background-color: var(--bm-color-bg);
+  color: var(--bm-color-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Malayalam typography support
+body.lang-ml, .lang-ml {
+  font-family: 'Manjari', 'Inter', -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 15px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// Utility classes
+.text-primary { color: var(--bm-color-primary) !important; }
+.text-secondary { color: var(--bm-color-text-secondary) !important; }
+.text-muted { color: var(--bm-color-text-muted) !important; }
+.text-success { color: var(--bm-color-success) !important; }
+.text-danger { color: var(--bm-color-danger) !important; }
+.text-warning { color: var(--bm-color-warning) !important; }
+
+.bg-surface { background-color: var(--bm-color-surface); }
+.bg-subtle { background-color: var(--bm-color-surface-subtle); }
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hide-scroll {
+  @include mixins.hide-scrollbar;
+}
+
+// Loading Skeleton Shimmer
+.bm-skeleton {
+  background: linear-gradient(90deg, #f0f2f1 25%, #e2e8e4 50%, #f0f2f1 75%);
+  background-size: 200% 100%;
+  animation: bm-shimmer 1.5s infinite;
+  border-radius: var(--bm-radius-md);
+}
+
+@keyframes bm-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -1,0 +1,498 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Info,
+  MapPin,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Store,
+} from 'lucide-angular';
+import { LucideAngularModule } from 'lucide-angular';
+import { FormattedCart } from '../../../../core/models/cart.model';
+import { PoolRecord } from '../../../../core/models/pool.model';
+import { StoreRecord } from '../../../../core/models/store.model';
+import { CartService } from '../../../../core/services/cart.service';
+import { PoolService } from '../../../../core/services/pool.service';
+import { StoreService } from '../../../../core/services/store.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { TranslationService } from '../../../../core/services/translation.service';
+
+@Component({
+  selector: 'bm-checkout-page',
+  standalone: true,
+  imports: [CommonModule, RouterModule, LucideAngularModule],
+  template: `
+    <div class="bm-checkout-view">
+      <!-- Top Bar -->
+      <div class="bm-checkout-top">
+        <a routerLink="/cart" class="bm-back-btn" aria-label="Back to Cart">
+          <lucide-icon [img]="ArrowLeftIcon" [size]="20"></lucide-icon>
+        </a>
+        <h1 class="bm-checkout-title">{{ t('checkout_title') }}</h1>
+      </div>
+
+      @if (cart(); as c) {
+        <div class="bm-checkout-content">
+          <!-- Store Details Card -->
+          <div class="bm-card bm-store-box">
+            <div class="bm-store-head">
+              <lucide-icon [img]="StoreIcon" [size]="18" class="text-primary"></lucide-icon>
+              <h2 class="bm-store-name">{{ c.store.name }}</h2>
+            </div>
+            <div class="bm-store-location">
+              <lucide-icon [img]="MapPinIcon" [size]="14" class="text-muted"></lucide-icon>
+              <span>Store Pickup Point • Kerala</span>
+            </div>
+          </div>
+
+          <!-- Fulfilment Method Card (Store Pickup) -->
+          <div class="bm-card bm-fulfilment-box">
+            <div class="bm-fulfilment-head">
+              <lucide-icon [img]="ShieldCheckIcon" [size]="20" class="text-primary"></lucide-icon>
+              <h3 class="bm-fulfilment-title">{{ t('checkout_pickup_title') }}</h3>
+            </div>
+            <p class="bm-fulfilment-desc">{{ t('checkout_pickup_desc') }}</p>
+            <div class="bm-otp-notice">
+              <span>A secure 6-digit pickup verification code will be dispatched to your registered WhatsApp when the merchant confirms your order.</span>
+            </div>
+          </div>
+
+          <!-- Items Snapshot -->
+          <div class="bm-card bm-items-box">
+            <h3 class="bm-card-heading">Store Order Items ({{ c.itemCount }})</h3>
+            <div class="bm-items-list">
+              @for (item of c.items; track item.productId) {
+                <div class="bm-checkout-item">
+                  <div class="bm-item-left">
+                    <span class="bm-item-qty">{{ item.quantity }}x</span>
+                    <span class="bm-item-title">{{ item.name }}</span>
+                  </div>
+                  <span class="bm-item-amount">₹{{ (item.currentPrice || item.priceAtAddition) * item.quantity }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Applicable Pool Opportunity -->
+          @if (activeStorePool(); as pool) {
+            <div class="bm-card bm-pool-opp-card">
+              <div class="bm-opp-head">
+                <lucide-icon [img]="SparklesIcon" [size]="18" class="text-primary"></lucide-icon>
+                <span class="bm-opp-title">Pool Discount Eligible</span>
+              </div>
+              <p class="bm-opp-desc">
+                Commit this cart to <strong>{{ pool.title }}</strong> to earn up to {{ pool.maxDiscountPercentage }}% off wholesale price!
+              </p>
+            </div>
+          }
+
+          <!-- Order Cost Summary -->
+          <div class="bm-card bm-summary-box">
+            <h3 class="bm-card-heading">{{ t('checkout_summary') }}</h3>
+
+            <div class="bm-summary-row">
+              <span class="bm-summary-label">{{ t('checkout_item_total') }}</span>
+              <span class="bm-summary-val">₹{{ c.cartTotal }}</span>
+            </div>
+
+            <div class="bm-summary-row">
+              <span class="bm-summary-label">Store Pickup Handling</span>
+              <span class="bm-summary-val text-success">FREE</span>
+            </div>
+
+            @if (activeStorePool()) {
+              <div class="bm-summary-row">
+                <span class="bm-summary-label">{{ t('checkout_group_discount') }}</span>
+                <span class="bm-summary-val text-success">Up to {{ activeStorePool()?.maxDiscountPercentage }}% off</span>
+              </div>
+            }
+
+            <div class="bm-summary-divider"></div>
+
+            <div class="bm-summary-row is-total">
+              <span class="bm-total-label">{{ t('checkout_final_estimate') }}</span>
+              <span class="bm-total-val">₹{{ c.cartTotal }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Confirmation Bar -->
+        <div class="bm-sticky-confirm-bar">
+          <div class="bm-confirm-total-box">
+            <span class="bm-total-sub">Total Payable at Pickup</span>
+            <span class="bm-total-amount">₹{{ c.cartTotal }}</span>
+          </div>
+
+          <button
+            type="button"
+            class="bm-btn-confirm-order"
+            [disabled]="isSubmitting()"
+            (click)="confirmOrder(c.id, c.store.id)"
+          >
+            <lucide-icon [img]="CheckCircleIcon" [size]="18"></lucide-icon>
+            <span>{{ isSubmitting() ? 'Confirming...' : t('checkout_place_order') }}</span>
+          </button>
+        </div>
+      } @else {
+        <div class="bm-empty-checkout">
+          <p>No active cart items found for this store.</p>
+          <a routerLink="/cart" class="bm-btn-return">Return to Cart</a>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    .bm-checkout-view {
+      padding-bottom: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bm-checkout-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background-color: var(--bm-color-surface);
+      border-bottom: 1px solid var(--bm-color-border);
+    }
+
+    .bm-back-btn {
+      color: var(--bm-color-text-primary);
+      display: flex;
+      align-items: center;
+    }
+
+    .bm-checkout-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--bm-color-text-primary);
+    }
+
+    .bm-checkout-content {
+      padding: 0 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bm-card {
+      background-color: var(--bm-color-surface);
+      border: 1px solid var(--bm-color-border);
+      border-radius: var(--bm-radius-lg);
+      padding: 14px;
+      box-shadow: var(--bm-shadow-xs);
+    }
+
+    .bm-card-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--bm-color-text-primary);
+      margin-bottom: 10px;
+    }
+
+    .bm-store-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bm-store-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bm-store-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--bm-color-text-primary);
+    }
+
+    .bm-store-location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--bm-color-text-secondary);
+    }
+
+    .bm-fulfilment-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .bm-fulfilment-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bm-fulfilment-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--bm-color-text-primary);
+    }
+
+    .bm-fulfilment-desc {
+      font-size: 12px;
+      color: var(--bm-color-text-secondary);
+      line-height: 1.4;
+    }
+
+    .bm-otp-notice {
+      background-color: var(--bm-color-surface-subtle);
+      border: 1px dashed var(--bm-color-primary-border);
+      border-radius: var(--bm-radius-md);
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--bm-color-text-primary);
+      line-height: 1.35;
+    }
+
+    .bm-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .bm-checkout-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .bm-item-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .bm-item-qty {
+      font-weight: 700;
+      color: var(--bm-color-primary);
+    }
+
+    .bm-item-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bm-item-amount {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .bm-pool-opp-card {
+      background-color: var(--bm-color-primary-soft);
+      border-color: var(--bm-color-primary-border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bm-opp-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bm-opp-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--bm-color-primary);
+    }
+
+    .bm-opp-desc {
+      font-size: 12px;
+      color: var(--bm-color-text-secondary);
+      line-height: 1.35;
+    }
+
+    .bm-summary-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .bm-summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+
+      &.is-total {
+        font-size: 16px;
+        font-weight: 800;
+        margin-top: 4px;
+      }
+    }
+
+    .bm-summary-label {
+      color: var(--bm-color-text-secondary);
+    }
+
+    .bm-summary-val {
+      font-weight: 600;
+    }
+
+    .bm-summary-divider {
+      height: 1px;
+      background-color: var(--bm-color-border-subtle);
+      margin: 4px 0;
+    }
+
+    .bm-total-label {
+      color: var(--bm-color-text-primary);
+    }
+
+    .bm-total-val {
+      color: var(--bm-color-primary);
+    }
+
+    .bm-sticky-confirm-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: var(--bm-max-mobile-width);
+      margin: 0 auto;
+      background-color: var(--bm-color-surface);
+      border-top: 1px solid var(--bm-color-border);
+      padding: 10px 14px calc(10px + var(--bm-safe-bottom));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      box-shadow: var(--bm-shadow-sheet);
+    }
+
+    .bm-confirm-total-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bm-total-sub {
+      font-size: 11px;
+      color: var(--bm-color-text-muted);
+    }
+
+    .bm-total-amount {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--bm-color-text-primary);
+    }
+
+    .bm-btn-confirm-order {
+      height: 44px;
+      padding: 0 18px;
+      background-color: var(--bm-color-primary);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: var(--bm-radius-md);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      &:hover {
+        background-color: var(--bm-color-primary-hover);
+      }
+    }
+
+    .bm-empty-checkout {
+      padding: 48px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bm-btn-return {
+      padding: 8px 16px;
+      background-color: var(--bm-color-primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      border-radius: var(--bm-radius-md);
+    }
+  `],
+})
+export class CheckoutPageComponent implements OnInit {
+  private readonly cartService = inject(CartService);
+  private readonly poolService = inject(PoolService);
+  private readonly toast = inject(ToastService);
+  private readonly i18n = inject(TranslationService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  readonly ArrowLeftIcon = ArrowLeft;
+  readonly StoreIcon = Store;
+  readonly MapPinIcon = MapPin;
+  readonly ShieldCheckIcon = ShieldCheck;
+  readonly SparklesIcon = Sparkles;
+  readonly CheckCircleIcon = CheckCircle2;
+
+  readonly cart = signal<FormattedCart | null>(null);
+  readonly activeStorePool = signal<PoolRecord | null>(null);
+  readonly isSubmitting = signal<boolean>(false);
+
+  ngOnInit(): void {
+    this.route.params.subscribe((params) => {
+      const storeId = params['storeId'];
+      if (storeId) {
+        const matchingCart = this.cartService.getStoreCart(storeId);
+        this.cart.set(matchingCart || null);
+
+        // Check for active pools for this store
+        this.poolService.getPools({ storeId, limit: 1 }).subscribe({
+          next: (res) => {
+            if (res.pools.length > 0) {
+              this.activeStorePool.set(res.pools[0]);
+            }
+          },
+        });
+      }
+    });
+  }
+
+  confirmOrder(cartId: string, storeId: string): void {
+    const pool = this.activeStorePool();
+    this.isSubmitting.set(true);
+
+    if (pool) {
+      // In BuyMass group-buying model, cart submits to the store pool
+      this.poolService.participateInPool(pool.id, cartId).subscribe({
+        next: (res) => {
+          this.isSubmitting.set(false);
+          this.toast.success('Store order submitted to pool! You will receive pickup OTP on WhatsApp.');
+          this.cartService.loadCarts().subscribe();
+          this.router.navigate(['/orders']);
+        },
+        error: (err) => {
+          this.isSubmitting.set(false);
+          this.toast.error(err.message || 'Order submission could not be completed.');
+        },
+      });
+    } else {
+      // Direct store purchase simulation notice:
+      this.isSubmitting.set(false);
+      this.toast.info('Order placed! Present WhatsApp OTP at store pickup.');
+      this.router.navigate(['/orders']);
+    }
+  }
+
+  t(key: string, params?: Record<string, string | number>): string {
+    return this.i18n.t(key, params);
+  }
+}
