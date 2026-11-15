@@ -1,3 +1,14 @@
+export interface StorePhoto {
+  id?: string;
+  url: string;
+  category?: string;
+}
+
+export interface StoreLocationObject {
+  latitude: number;
+  longitude: number;
+}
+
 export interface StoreRecord {
   id: string;
   storeName: string;
@@ -9,12 +20,16 @@ export interface StoreRecord {
   district?: string;
   state: string;
   postalCode: string;
+  country?: string;
   latitude?: number;
   longitude?: number;
-  location?: [number, number];
+  location?: StoreLocationObject | [number, number];
   primaryImageUrl?: string;
+  photos?: StorePhoto[];
   imageUrls?: string[];
   status: 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
   activeCampaignCount?: number;
   distanceKm?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }

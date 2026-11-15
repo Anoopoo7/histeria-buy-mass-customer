@@ -66,24 +66,11 @@ export class StoreService {
               distanceKm = Number((meters / 1000).toFixed(1));
             }
           }
-
-          return {
-            id: doc.id,
-            storeName: doc.storeName,
-            storeCode: doc.storeCode,
-            businessType: doc.businessType,
-            description: doc.description,
-            addressLine1: doc.addressLine1 || '',
-            city: doc.city,
-            district: doc.district,
-            state: doc.state,
-            postalCode: doc.postalCode,
-            location: doc.location,
-            primaryImageUrl: doc.primaryImageUrl,
-            imageUrls: doc.imageUrls || [],
-            status: doc.status || 'APPROVED',
-            distanceKm,
-          };
+          const normalized = this.normalizeStoreRecord(doc);
+          if (distanceKm !== undefined) {
+            normalized.distanceKm = distanceKm;
+          }
+          return normalized;
         });
 
         return {
@@ -96,20 +83,7 @@ export class StoreService {
         return this.api.get<any>('/api/v1/merchants').pipe(
           map((res) => {
             const list = Array.isArray(res) ? res : res?.data || res?.merchants || [];
-            const stores: StoreRecord[] = list.map((m: any) => ({
-              id: m.id || m._id,
-              storeName: m.storeName,
-              storeCode: m.storeCode,
-              businessType: m.businessType || 'General Retail',
-              description: m.description,
-              addressLine1: m.addressLine1,
-              city: m.city || 'Kerala',
-              district: m.district,
-              state: m.state || 'Kerala',
-              postalCode: m.postalCode || '682001',
-              primaryImageUrl: m.photos?.[0]?.url || m.primaryImageUrl,
-              status: m.status || 'APPROVED',
-            }));
+            const stores: StoreRecord[] = list.map((m: any) => this.normalizeStoreRecord(m));
             return { stores, total: stores.length };
           }),
           catchError(() => of({ stores: [], total: 0 })),
@@ -119,33 +93,112 @@ export class StoreService {
   }
 
   /**
-   * Resolve Store details by storeId.
+   * Public API for getting store details:
+   * GET /api/v1/stores/:storeId
    */
   getStoreById(storeId: string): Observable<StoreRecord | null> {
-    // Attempt Typesense search by storeId
-    return this.api.get<TypesenseSearchResult<any>>('/api/v1/search/stores', { params: { q: storeId, limit: 1 } }).pipe(
+    if (!storeId) return of(null);
+
+    return this.api.get<any>(`/api/v1/stores/${storeId}`).pipe(
       map((res) => {
-        const match = res.hits?.find((h) => h.document.id === storeId)?.document;
-        if (match) {
-          return {
-            id: match.id,
-            storeName: match.storeName,
-            storeCode: match.storeCode,
-            businessType: match.businessType,
-            description: match.description,
-            addressLine1: match.addressLine1,
-            city: match.city,
-            district: match.district,
-            state: match.state,
-            postalCode: match.postalCode,
-            primaryImageUrl: match.primaryImageUrl,
-            imageUrls: match.imageUrls || [],
-            status: match.status,
-          } as StoreRecord;
+        const storeDoc = res?.store || res?.data || res;
+        if (storeDoc && (storeDoc.id || storeDoc._id)) {
+          return this.normalizeStoreRecord(storeDoc);
         }
         return null;
       }),
-      catchError(() => of(null)),
+      catchError(() => {
+        // Fallback to Typesense search if direct endpoint encounters issues
+        return this.api
+          .get<TypesenseSearchResult<any>>('/api/v1/search/stores', { params: { q: storeId, limit: 1 } })
+          .pipe(
+            map((res) => {
+              const match = res.hits?.find((h) => h.document.id === storeId)?.document;
+              if (match) {
+                return this.normalizeStoreRecord(match);
+              }
+              return null;
+            }),
+            catchError(() => of(null)),
+          );
+      }),
     );
+  }
+
+  normalizeStoreRecord(doc: any): StoreRecord {
+    let lat: number | undefined;
+    let lng: number | undefined;
+
+    // Handle location object { latitude, longitude }
+    if (doc.location && typeof doc.location === 'object') {
+      if ('latitude' in doc.location && 'longitude' in doc.location) {
+        lat = Number(doc.location.latitude);
+        lng = Number(doc.location.longitude);
+      } else if (Array.isArray(doc.location) && doc.location.length >= 2) {
+        // GeoJSON [lng, lat]
+        lng = Number(doc.location[0]);
+        lat = Number(doc.location[1]);
+      }
+    }
+
+    if (lat === undefined && doc.latitude !== undefined) {
+      lat = Number(doc.latitude);
+    }
+    if (lng === undefined && doc.longitude !== undefined) {
+      lng = Number(doc.longitude);
+    }
+    if (lat === undefined && doc.coordinates) {
+      lat = Number(doc.coordinates.lat || doc.coordinates.latitude);
+      lng = Number(doc.coordinates.lng || doc.coordinates.longitude);
+    }
+    if (lat === undefined && doc.address?.latitude && doc.address?.longitude) {
+      lat = Number(doc.address.latitude);
+      lng = Number(doc.address.longitude);
+    }
+
+    // Collect all photos / images in order
+    const rawImages: string[] = [];
+
+    if (Array.isArray(doc.photos) && doc.photos.length > 0) {
+      doc.photos.forEach((p: any) => {
+        const url = typeof p === 'string' ? p : p?.url;
+        if (url) rawImages.push(url);
+      });
+    }
+
+    if (Array.isArray(doc.imageUrls) && doc.imageUrls.length > 0) {
+      doc.imageUrls.forEach((img: string) => {
+        if (img && !rawImages.includes(img)) rawImages.push(img);
+      });
+    }
+
+    if (doc.primaryImageUrl && !rawImages.includes(doc.primaryImageUrl)) {
+      rawImages.unshift(doc.primaryImageUrl);
+    }
+
+    return {
+      id: doc.id || doc._id,
+      storeName: doc.storeName || doc.businessName || 'Partner Store',
+      storeCode: doc.storeCode,
+      businessType: doc.businessType || 'General Retail',
+      description: doc.description,
+      addressLine1: doc.addressLine1 || doc.address?.line1 || '',
+      city: doc.city || doc.address?.city || 'Kerala',
+      district: doc.district || doc.address?.district,
+      state: doc.state || doc.address?.state || 'Kerala',
+      postalCode: doc.postalCode || doc.address?.postalCode || '682001',
+      country: doc.country || 'IN',
+      latitude: lat,
+      longitude: lng,
+      location: doc.location,
+      primaryImageUrl: doc.primaryImageUrl || rawImages[0],
+      photos: doc.photos,
+      imageUrls: rawImages,
+      status: doc.status || 'APPROVED',
+      activeCampaignCount: doc.activeCampaignCount,
+      distanceKm: doc.distanceKm,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    };
   }
 }
