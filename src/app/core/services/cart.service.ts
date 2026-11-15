@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
-import { FormattedCart, FormattedCartItem, GetActiveCartsResponse } from '../models/cart.model';
+import { FormattedCart, FormattedCartItem, GetActiveCartsResponse, GetSubmittedCartsResponse, CartStatus } from '../models/cart.model';
 import { ApiClientService } from './api-client.service';
 import { AuthService } from './auth.service';
 import { ToastService } from './toast.service';
@@ -144,6 +144,63 @@ export class CartService {
         this.toast.error(err.message || 'Could not clear store cart');
         return of(null);
       }),
+    );
+  }
+
+  /**
+   * GET /api/v1/cart/submitted
+   * Returns paginated submitted carts (carts submitted to pool but not placed as order).
+   * Filterable by storeId and status.
+   */
+  getSubmittedCarts(params?: {
+    page?: number;
+    limit?: number;
+    storeId?: string;
+    status?: CartStatus | CartStatus[] | 'ALL';
+  }): Observable<GetSubmittedCartsResponse> {
+    if (!this.auth.isAuthenticated()) {
+      return of({
+        data: [],
+        pagination: { total: 0, page: 1, limit: params?.limit || 10, totalPages: 0 },
+      });
+    }
+
+    const queryParams: Record<string, string | number> = {
+      page: params?.page || 1,
+      limit: params?.limit || 10,
+    };
+
+    if (params?.storeId) {
+      queryParams['storeId'] = params.storeId;
+    }
+
+    if (params?.status) {
+      queryParams['status'] = Array.isArray(params.status) ? params.status.join(',') : params.status;
+    } else {
+      queryParams['status'] = 'SUBMITTED';
+    }
+
+    return this.api.get<GetSubmittedCartsResponse>('/api/v1/cart/submitted', { params: queryParams }).pipe(
+      catchError(() =>
+        of({
+          data: [],
+          pagination: { total: 0, page: 1, limit: params?.limit || 10, totalPages: 0 },
+        }),
+      ),
+    );
+  }
+
+  /**
+   * GET /api/v1/cart/submitted/:cartId
+   * Returns single submitted cart details by cart ID.
+   */
+  getSubmittedCartById(cartId: string): Observable<FormattedCart | null> {
+    if (!this.auth.isAuthenticated() || !cartId) {
+      return of(null);
+    }
+    return this.api.get<{ cart: FormattedCart }>(`/api/v1/cart/submitted/${cartId}`).pipe(
+      map((res) => res?.cart || null),
+      catchError(() => of(null)),
     );
   }
 }

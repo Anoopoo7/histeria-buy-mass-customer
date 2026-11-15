@@ -22,11 +22,20 @@ export interface FormattedCart {
   store: {
     id: string;
     name: string;
+    city?: string;
+    district?: string;
+    state?: string;
   };
   items: FormattedCartItem[];
   itemCount: number;
   cartTotal: number;
   status: CartStatus;
+  pool?: {
+    id: string;
+    title: string;
+    status: string;
+    endsAt?: string | number | Date;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -34,4 +43,16 @@ export interface FormattedCart {
 export interface GetActiveCartsResponse {
   totalCarts: number;
   carts: FormattedCart[];
+}
+
+export interface SubmittedCartsPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface GetSubmittedCartsResponse {
+  data: FormattedCart[];
+  pagination: SubmittedCartsPagination;
 }

@@ -1,3 +1,16 @@
+export interface ProductStoreInfo {
+  id: string;
+  storeName: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  primaryImageUrl?: string;
+}
+
 export interface ProductImage {
   id: string;
   url: string;
@@ -9,7 +22,9 @@ export interface ProductRecord {
   storeId: string;
   storeName?: string;
   storeCity?: string;
+  storeDistrict?: string;
   storeState?: string;
+  store?: ProductStoreInfo;
   name: string;
   description: string;
   category: string;
@@ -24,4 +39,6 @@ export interface ProductRecord {
   imageUrls?: string[];
   location?: [number, number];
   distanceKm?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }

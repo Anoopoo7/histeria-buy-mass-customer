@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Clock,
   Package,
+  Sparkles,
   Store,
 } from 'lucide-angular';
 import { LucideAngularModule } from 'lucide-angular';
@@ -26,6 +27,15 @@ import { TranslationService } from '../../../../core/services/translation.servic
         <h1 class="bm-orders-title">{{ t('orders_title') }}</h1>
         <span class="bm-orders-badge">{{ orders().length }}</span>
       </div>
+
+      <!-- Pool Submissions Link Pill -->
+      <a [routerLink]="['/cart']" [queryParams]="{ tab: 'submitted' }" class="bm-pool-sub-banner">
+        <div class="bm-pool-sub-left">
+          <lucide-icon [img]="SparklesIcon" [size]="15" class="text-primary"></lucide-icon>
+          <span>Have a cart committed to a pool? View Pool-Submitted Carts</span>
+        </div>
+        <lucide-icon [img]="ChevronRightIcon" [size]="14" class="text-muted"></lucide-icon>
+      </a>
 
       <!-- Status Filter Tabs -->
       <div class="bm-status-tabs hide-scroll">
@@ -136,6 +146,32 @@ import { TranslationService } from '../../../../core/services/translation.servic
     }
 
     .bm-orders-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bm-pool-sub-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      background-color: rgba(23, 107, 80, 0.08);
+      border: 1px solid rgba(23, 107, 80, 0.2);
+      border-radius: var(--bm-radius-md);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--bm-color-primary);
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: rgba(23, 107, 80, 0.14);
+      }
+    }
+
+    .bm-pool-sub-left {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -377,6 +413,7 @@ export class OrdersPageComponent implements OnInit {
   readonly StoreIcon = Store;
   readonly ChevronRightIcon = ChevronRight;
   readonly PackageIcon = Package;
+  readonly SparklesIcon = Sparkles;
 
   readonly orders = signal<OrderRecord[]>([]);
   readonly isLoading = signal<boolean>(true);

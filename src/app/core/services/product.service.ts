@@ -51,26 +51,11 @@ export class ProductService {
               distanceKm = Number((meters / 1000).toFixed(1));
             }
           }
-
-          return {
-            id: doc.id,
-            storeId: doc.storeId,
-            storeName: doc.storeName,
-            storeCity: doc.storeCity,
-            storeState: doc.storeState,
-            name: doc.name,
-            description: doc.description || '',
-            category: doc.category,
-            brand: doc.brand,
-            sku: doc.sku,
-            unit: doc.unit || 'unit',
-            price: doc.price,
-            originalPrice: doc.originalPrice || Math.round(doc.price * 1.15),
-            primaryImageUrl: doc.primaryImageUrl,
-            imageUrls: doc.imageUrls || [],
-            status: doc.status || 'ACTIVE',
-            distanceKm,
-          };
+          const normalized = this.normalizeProductRecord(doc);
+          if (distanceKm !== undefined) {
+            normalized.distanceKm = distanceKm;
+          }
+          return normalized;
         });
 
         return { products, total: res.found || products.length };
@@ -88,21 +73,7 @@ export class ProductService {
           .pipe(
             map((res) => {
               const list = Array.isArray(res) ? res : res?.data || res?.products || [];
-              const products: ProductRecord[] = list.map((p: any) => ({
-                id: p.id || p._id,
-                storeId: p.storeId,
-                name: p.name,
-                description: p.description || '',
-                category: p.category,
-                brand: p.brand,
-                sku: p.sku,
-                unit: p.unit || 'unit',
-                price: p.price,
-                originalPrice: p.originalPrice || Math.round(p.price * 1.15),
-                primaryImageUrl: p.images?.[0]?.url || p.primaryImageUrl,
-                imageUrls: p.images?.map((i: any) => i.url) || [],
-                status: p.status || 'ACTIVE',
-              }));
+              const products: ProductRecord[] = list.map((p: any) => this.normalizeProductRecord(p));
               return { products, total: products.length };
             }),
             catchError(() => of({ products: [], total: 0 })),
@@ -112,32 +83,87 @@ export class ProductService {
   }
 
   getProductById(productId: string): Observable<ProductRecord | null> {
-    return this.api.get<any>('/api/v1/search/products', { params: { q: productId, limit: 1 } }).pipe(
+    if (!productId) return of(null);
+
+    return this.api.get<any>(`/api/v1/products/${productId}`).pipe(
       map((res) => {
-        const match = res.hits?.find((h: any) => h.document.id === productId)?.document;
-        if (match) {
-          return {
-            id: match.id,
-            storeId: match.storeId,
-            storeName: match.storeName,
-            storeCity: match.storeCity,
-            storeState: match.storeState,
-            name: match.name,
-            description: match.description || '',
-            category: match.category,
-            brand: match.brand,
-            sku: match.sku,
-            unit: match.unit || 'unit',
-            price: match.price,
-            originalPrice: match.originalPrice,
-            primaryImageUrl: match.primaryImageUrl,
-            imageUrls: match.imageUrls || [],
-            status: match.status,
-          } as ProductRecord;
+        const p = res?.product || res?.data || res;
+        if (p && (p.id || p._id)) {
+          return this.normalizeProductRecord(p);
         }
         return null;
       }),
-      catchError(() => of(null)),
+      catchError(() => {
+        // Fallback to Typesense search
+        return this.api
+          .get<any>('/api/v1/search/products', { params: { q: productId, limit: 1 } })
+          .pipe(
+            map((res) => {
+              const match = res.hits?.find((h: any) => h.document.id === productId)?.document;
+              if (match) {
+                return this.normalizeProductRecord(match);
+              }
+              return null;
+            }),
+            catchError(() => of(null)),
+          );
+      }),
     );
+  }
+
+  normalizeProductRecord(doc: any): ProductRecord {
+    const rawImages: string[] = [];
+    if (doc.primaryImageUrl) rawImages.push(doc.primaryImageUrl);
+    if (Array.isArray(doc.images)) {
+      doc.images.forEach((img: any) => {
+        const u = typeof img === 'string' ? img : img?.url;
+        if (u && !rawImages.includes(u)) rawImages.push(u);
+      });
+    }
+    if (Array.isArray(doc.imageUrls)) {
+      doc.imageUrls.forEach((u: string) => {
+        if (u && !rawImages.includes(u)) rawImages.push(u);
+      });
+    }
+
+    const price = Number(doc.price) || 0;
+    const originalPrice = doc.originalPrice ? Number(doc.originalPrice) : undefined;
+
+    const storeObj = doc.store
+      ? {
+          id: doc.store.id || doc.storeId,
+          storeName: doc.store.storeName || doc.storeName,
+          city: doc.store.city || doc.storeCity,
+          district: doc.store.district || doc.storeDistrict,
+          state: doc.store.state || doc.storeState,
+          location: doc.store.location,
+          primaryImageUrl: doc.store.primaryImageUrl,
+        }
+      : undefined;
+
+    return {
+      id: doc.id || doc._id,
+      storeId: doc.storeId || storeObj?.id,
+      storeName: storeObj?.storeName || doc.storeName || 'Partner Store',
+      storeCity: storeObj?.city || doc.storeCity || 'Kerala',
+      storeDistrict: storeObj?.district || doc.storeDistrict,
+      storeState: storeObj?.state || doc.storeState || 'Kerala',
+      store: storeObj,
+      name: doc.name,
+      description: doc.description || '',
+      category: doc.category || 'General',
+      brand: doc.brand,
+      sku: doc.sku,
+      unit: doc.unit || 'unit',
+      price,
+      originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
+      primaryImageUrl: doc.primaryImageUrl || rawImages[0],
+      imageUrls: rawImages,
+      images: Array.isArray(doc.images) ? doc.images : undefined,
+      status: doc.status || 'ACTIVE',
+      distanceKm: doc.distanceKm,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    };
   }
 }

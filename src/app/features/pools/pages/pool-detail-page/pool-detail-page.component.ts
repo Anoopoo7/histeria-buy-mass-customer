@@ -186,8 +186,13 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
             }
           } @else {
             <div class="bm-participation-confirmed">
-              <lucide-icon [img]="CheckCircleIcon" [size]="18" class="text-success"></lucide-icon>
-              <span>Participation active. Final discount applies upon campaign close!</span>
+              <div class="bm-part-meta-left">
+                <lucide-icon [img]="CheckCircleIcon" [size]="18" class="text-success"></lucide-icon>
+                <span>Participation active. Final discount applies upon campaign close!</span>
+              </div>
+              <a [routerLink]="['/cart']" [queryParams]="{ tab: 'submitted', storeId: p.storeId }" class="bm-btn-view-submitted">
+                View Submitted Cart
+              </a>
             </div>
           }
         </div>
@@ -497,10 +502,36 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
     .bm-participation-confirmed {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
       font-size: 12px;
       font-weight: 600;
       color: var(--bm-color-success);
+    }
+
+    .bm-part-meta-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .bm-btn-view-submitted {
+      padding: 6px 12px;
+      background-color: var(--bm-color-primary);
+      color: #fff;
+      border-radius: var(--bm-radius-md);
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--bm-color-primary-hover);
+      }
     }
 
     .bm-detail-skeleton {

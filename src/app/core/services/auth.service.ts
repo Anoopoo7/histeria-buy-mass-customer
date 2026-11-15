@@ -75,7 +75,7 @@ export class AuthService {
   login(payload: LoginRequest): Observable<AuthResponse> {
     this._isLoading.set(true);
     const request = {
-      identifier: payload.identifier,
+      email: payload.identifier,
       password: payload.password,
     };
 
@@ -113,7 +113,7 @@ export class AuthService {
   verifyPhone(phone: string, otp: string): Observable<VerifyPhoneOtpResponse> {
     this._isLoading.set(true);
     const req: VerifyPhoneOtpRequest = { phone: phone.trim(), otp: otp.trim() };
-    return this.apiClient.post<VerifyPhoneOtpResponse>('/api/v1/auth/verify-phone', req).pipe(
+    return this.apiClient.post<VerifyPhoneOtpResponse>('/api/v1/auth/phone/otp/verify', req).pipe(
       tap((res) => {
         this._isLoading.set(false);
         this.toast.success(res.message || 'Phone number verified successfully');

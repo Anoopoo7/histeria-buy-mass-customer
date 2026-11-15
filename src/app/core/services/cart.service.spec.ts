@@ -114,4 +114,76 @@ describe('CartService', () => {
       done();
     });
   });
+
+  it('should fetch submitted carts via GET /api/v1/cart/submitted with store filter and pagination', (done) => {
+    const mockSubmittedResponse = {
+      data: [
+        {
+          id: 'cart-sub-1',
+          userId: 'user_123',
+          store: { id: 'store_a', name: 'Fresh Mart Kadavanthra', city: 'Kochi' },
+          items: [
+            {
+              productId: 'prod_1',
+              name: 'Coconut Oil 1L',
+              image: null,
+              quantity: 2,
+              priceAtAddition: 220,
+              currentPrice: 220,
+              itemSubtotal: 440,
+            },
+          ],
+          itemCount: 2,
+          cartTotal: 440,
+          status: 'SUBMITTED' as const,
+          pool: {
+            id: 'pool_xyz',
+            title: 'Weekend sales',
+            status: 'ACTIVE',
+          },
+          createdAt: '2026-11-15T10:00:00.000Z',
+          updatedAt: '2026-11-15T10:00:00.000Z',
+        },
+      ],
+      pagination: {
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+      },
+    };
+
+    apiClientSpy.get.and.returnValue(of(mockSubmittedResponse));
+
+    service.getSubmittedCarts({ page: 1, limit: 10, storeId: 'store_a' }).subscribe((res) => {
+      expect(apiClientSpy.get).toHaveBeenCalledWith('/api/v1/cart/submitted', {
+        params: {
+          page: 1,
+          limit: 10,
+          storeId: 'store_a',
+          status: 'SUBMITTED',
+        },
+      });
+      expect(res.data.length).toBe(1);
+      expect(res.data[0].id).toBe('cart-sub-1');
+      expect(res.data[0].status).toBe('SUBMITTED');
+      expect(res.data[0].pool?.title).toBe('Weekend sales');
+      done();
+    });
+  });
+
+  it('should fetch single submitted cart by id via GET /api/v1/cart/submitted/:cartId', (done) => {
+    const mockSingle = {
+      cart: mockCarts[0],
+    };
+
+    apiClientSpy.get.and.returnValue(of(mockSingle));
+
+    service.getSubmittedCartById('cart_store_1').subscribe((cart) => {
+      expect(apiClientSpy.get).toHaveBeenCalledWith('/api/v1/cart/submitted/cart_store_1');
+      expect(cart).toBeTruthy();
+      expect(cart?.id).toBe('cart_store_1');
+      done();
+    });
+  });
 });
