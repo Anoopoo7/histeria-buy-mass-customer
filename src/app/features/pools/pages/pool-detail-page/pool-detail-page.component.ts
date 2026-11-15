@@ -73,10 +73,11 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
             <!-- Progress Block -->
             <div class="bm-progress-wrapper">
               <bm-pool-progress
+                [progress]="p.progress"
                 [currentAmount]="p.currentTotalAmount || 0"
                 [targetAmount]="p.targetAmount || 10000"
-                [participantCount]="p.currentParticipantCount || 4"
-                [maxDiscount]="p.maxDiscountPercentage || 15"
+                [participantCountInput]="p.currentParticipantCount || 0"
+                [maxDiscountInput]="p.maxDiscountPercentage || 15"
                 [tiers]="p.tiers"
               ></bm-pool-progress>
             </div>
@@ -90,12 +91,21 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
             </h3>
 
             <div class="bm-tiers-list">
-              @for (tier of p.tiers; track tier.targetAmount; let idx = $index) {
-                <div class="bm-tier-row">
-                  <div class="bm-tier-badge">Tier {{ idx + 1 }}</div>
+              @for (tier of (p.progress?.tiersProgress || p.tiers); track tier.targetAmount; let idx = $index) {
+                <div class="bm-tier-row" [class.is-reached]="$any(tier).isReached">
+                  <div class="bm-tier-badge" [class.is-unlocked]="$any(tier).isReached">
+                    Tier {{ idx + 1 }}
+                    @if ($any(tier).isReached) { ✓ }
+                  </div>
                   <div class="bm-tier-details">
                     <span class="bm-tier-off">{{ tier.discountPercentage }}% Collective Discount</span>
-                    <span class="bm-tier-cond">Unlocked when pool hits ₹{{ tier.targetAmount }}</span>
+                    @if ($any(tier).isReached) {
+                      <span class="bm-tier-cond text-success font-semibold">Unlocked! Discount achieved</span>
+                    } @else if ($any(tier).remainingAmount) {
+                      <span class="bm-tier-cond">₹{{ $any(tier).remainingAmount }} needed to unlock</span>
+                    } @else {
+                      <span class="bm-tier-cond">Unlocked when pool hits ₹{{ tier.targetAmount }}</span>
+                    }
                   </div>
                 </div>
               }

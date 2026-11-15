@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of } from 'rxjs';
-import { PoolParticipationRecord, PoolRecord } from '../models/pool.model';
+import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { PoolLiveStatus, PoolParticipationRecord, PoolRecord, PoolTier } from '../models/pool.model';
+import { normalizeDateToIso } from '../utils/date.utils';
 import { ApiClientService } from './api-client.service';
 import { LocationService } from './location.service';
 
@@ -11,6 +12,100 @@ export class PoolService {
   private readonly api = inject(ApiClientService);
   private readonly locationService = inject(LocationService);
 
+  /**
+   * Fetch live progress & status for a single pool:
+   * GET /api/v1/pools/:poolId/status
+   */
+  getPoolStatus(poolId: string): Observable<PoolLiveStatus | null> {
+    if (!poolId) return of(null);
+    return this.api.get<any>(`/api/v1/pools/${poolId}/status`).pipe(
+      map((res) => {
+        const status = (res?.status || res?.data || res) as PoolLiveStatus;
+        if (status && (status.progress || status.poolId)) {
+          return status;
+        }
+        return null;
+      }),
+      catchError(() => of(null)),
+    );
+  }
+
+  /**
+   * Enrich multiple pools in PARALLEL via forkJoin without sequential blocking.
+   */
+  getPoolsWithLiveStatus(pools: PoolRecord[]): Observable<PoolRecord[]> {
+    if (!pools || pools.length === 0) {
+      return of([]);
+    }
+
+    const parallelRequests = pools.map((pool) =>
+      this.getPoolStatus(pool.id).pipe(
+        map((status) => (status ? this.mergeLiveStatusIntoPool(pool, status) : pool)),
+        catchError(() => of(pool)),
+      ),
+    );
+
+    return forkJoin(parallelRequests);
+  }
+
+  /**
+   * Merge live backend status & progress into a PoolRecord.
+   */
+  mergeLiveStatusIntoPool(pool: PoolRecord, liveStatus: PoolLiveStatus): PoolRecord {
+    const prog = liveStatus?.progress;
+    if (!prog) return pool;
+
+    const currentTotalAmount =
+      prog.accumulatedAmount !== undefined && prog.accumulatedAmount !== null
+        ? prog.accumulatedAmount
+        : prog.combinedEligibleCartValue || 0;
+
+    const currentParticipantCount =
+      prog.totalParticipants !== undefined && prog.totalParticipants !== null
+        ? prog.totalParticipants
+        : prog.totalParticipations || 0;
+
+    const currentDiscount =
+      prog.currentDiscountPercentage !== undefined && prog.currentDiscountPercentage !== null
+        ? prog.currentDiscountPercentage
+        : pool.discountPercentage || 0;
+
+    const targetAmount =
+      prog.overallTargetAmount || prog.targetAmount || pool.targetAmount || 10000;
+
+    const tiers: PoolTier[] =
+      prog.tiersProgress && prog.tiersProgress.length > 0
+        ? prog.tiersProgress.map((tp) => ({
+            targetAmount: tp.targetAmount,
+            discountPercentage: tp.discountPercentage,
+          }))
+        : pool.tiers;
+
+    const maxDiscount =
+      tiers.length > 0
+        ? Math.max(...tiers.map((t) => t.discountPercentage))
+        : pool.maxDiscountPercentage || currentDiscount || 10;
+
+    return {
+      ...pool,
+      title: liveStatus.title || pool.title,
+      status: liveStatus.status || pool.status,
+      startsAt: normalizeDateToIso(prog.startsAt || pool.startsAt),
+      endsAt: normalizeDateToIso(prog.endsAt || pool.endsAt),
+      currentTotalAmount,
+      currentParticipantCount,
+      targetAmount,
+      discountPercentage: currentDiscount,
+      maxDiscountPercentage: maxDiscount,
+      tiers,
+      liveStatus,
+      progress: prog,
+    };
+  }
+
+  /**
+   * Get discovery pools with live progress status.
+   */
   getPools(params?: {
     query?: string;
     category?: string;
@@ -61,10 +156,10 @@ export class PoolService {
             productNames: doc.productNames || [],
             categories: doc.categories || [],
             primaryImageUrl: doc.primaryImageUrl,
-            startsAt: new Date(doc.startsAt).toISOString(),
-            endsAt: new Date(doc.endsAt).toISOString(),
+            startsAt: normalizeDateToIso(doc.startsAt),
+            endsAt: normalizeDateToIso(doc.endsAt),
             status: doc.status || 'ACTIVE',
-            targetAmount: doc.targetAmount,
+            targetAmount: doc.targetAmount || 10000,
             discountPercentage: doc.maxDiscountPercentage || 10,
             maxDiscountPercentage: doc.maxDiscountPercentage || 10,
             tiers: [
@@ -72,7 +167,7 @@ export class PoolService {
               { targetAmount: Math.round((doc.targetAmount || 10000) * 0.6), discountPercentage: 10 },
               { targetAmount: doc.targetAmount || 10000, discountPercentage: doc.maxDiscountPercentage || 15 },
             ],
-            currentParticipantCount: 6, // default estimate if not finalized
+            currentParticipantCount: 0,
             distanceKm,
           };
         });
@@ -99,8 +194,8 @@ export class PoolService {
                 title: p.title,
                 description: p.description,
                 productIds: p.productIds || [],
-                startsAt: p.startsAt,
-                endsAt: p.endsAt,
+                startsAt: normalizeDateToIso(p.startsAt),
+                endsAt: normalizeDateToIso(p.endsAt),
                 status: p.status || 'ACTIVE',
                 tiers: p.tiers || [
                   { targetAmount: 3000, discountPercentage: 5 },
@@ -116,14 +211,25 @@ export class PoolService {
             catchError(() => of({ pools: [], total: 0 })),
           );
       }),
+      // Enrich all discovered pools with live progress in parallel
+      switchMap((result) => {
+        if (!result.pools.length) return of(result);
+        return this.getPoolsWithLiveStatus(result.pools).pipe(
+          map((enriched) => ({ pools: enriched, total: result.total })),
+        );
+      }),
     );
   }
 
+  /**
+   * Get single pool with live progress status:
+   * Combines pool document and /status in parallel.
+   */
   getPoolById(poolId: string): Observable<PoolRecord | null> {
-    return this.api.get<any>(`/api/v1/pools/${poolId}`).pipe(
+    const pool$ = this.api.get<any>(`/api/v1/pools/${poolId}`).pipe(
       map((res) => {
         const p = res?.pool || res;
-        if (!p || !p.id) return null;
+        if (!p || (!p.id && !p._id)) return null;
         return {
           id: p.id || p._id,
           poolCode: p.poolCode,
@@ -133,19 +239,30 @@ export class PoolService {
           description: p.description,
           productIds: p.productIds || [],
           products: p.products || [],
-          startsAt: p.startsAt,
-          endsAt: p.endsAt,
+          startsAt: normalizeDateToIso(p.startsAt),
+          endsAt: normalizeDateToIso(p.endsAt),
           durationMinutes: p.durationMinutes,
           status: p.status,
           minParticipants: p.minParticipants,
           tiers: p.tiers || [],
           targetAmount: p.targetAmount,
           discountPercentage: p.discountPercentage,
-          maxDiscountPercentage: p.discountPercentage || p.tiers?.[p.tiers.length - 1]?.discountPercentage || 10,
-          currentParticipantCount: p.finalParticipantCount || 4,
+          maxDiscountPercentage:
+            p.discountPercentage || p.tiers?.[p.tiers.length - 1]?.discountPercentage || 10,
+          currentParticipantCount: p.finalParticipantCount || 0,
           currentTotalAmount: p.finalCombinedValue || 0,
           primaryImageUrl: p.primaryImageUrl,
         } as PoolRecord;
+      }),
+      catchError(() => of(null)),
+    );
+
+    const status$ = this.getPoolStatus(poolId);
+
+    return forkJoin([pool$, status$]).pipe(
+      map(([pool, status]) => {
+        if (!pool) return null;
+        return status ? this.mergeLiveStatusIntoPool(pool, status) : pool;
       }),
       catchError(() => of(null)),
     );

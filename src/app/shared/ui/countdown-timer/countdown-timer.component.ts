@@ -1,6 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+  signal,
+} from '@angular/core';
 import { Clock, LucideAngularModule } from 'lucide-angular';
+import { parseTimestampMs } from '../../../core/utils/date.utils';
 
 @Component({
   selector: 'bm-countdown-timer',
@@ -42,8 +53,8 @@ import { Clock, LucideAngularModule } from 'lucide-angular';
     }
   `],
 })
-export class CountdownTimerComponent implements OnInit, OnDestroy {
-  @Input({ required: true }) endsAt!: string | Date;
+export class CountdownTimerComponent implements OnInit, OnChanges, OnDestroy {
+  @Input({ required: true }) endsAt!: string | Date | number;
   @Output() expired = new EventEmitter<void>();
 
   readonly ClockIcon = Clock;
@@ -57,6 +68,12 @@ export class CountdownTimerComponent implements OnInit, OnDestroy {
     this.intervalId = setInterval(() => this.updateRemaining(), 1000);
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['endsAt']) {
+      this.updateRemaining();
+    }
+  }
+
   ngOnDestroy(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -64,7 +81,7 @@ export class CountdownTimerComponent implements OnInit, OnDestroy {
   }
 
   private updateRemaining(): void {
-    const end = new Date(this.endsAt).getTime();
+    const end = parseTimestampMs(this.endsAt);
     const now = Date.now();
     const diff = end - now;
 
@@ -78,11 +95,20 @@ export class CountdownTimerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const hours = Math.floor(diff / (1000 * 60 * 60));
+    this.isExpired.set(false);
+
+    const totalHours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
     const pad = (n: number) => n.toString().padStart(2, '0');
-    this.formattedTime.set(`${pad(hours)}:${pad(minutes)}:${pad(seconds)}`);
+
+    if (totalHours >= 24) {
+      const days = Math.floor(totalHours / 24);
+      const remHours = totalHours % 24;
+      this.formattedTime.set(`${days}d ${pad(remHours)}h ${pad(minutes)}m`);
+    } else {
+      this.formattedTime.set(`${pad(totalHours)}:${pad(minutes)}:${pad(seconds)}`);
+    }
   }
 }

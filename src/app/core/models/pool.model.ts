@@ -22,6 +22,62 @@ export interface PoolProductItem {
   discountPercentage?: number;
 }
 
+export interface PoolTierProgress {
+  tierIndex: number;
+  targetAmount: number;
+  discountPercentage: number;
+  isReached: boolean;
+  isCurrent: boolean;
+  remainingAmount: number;
+  progressPercentage: number;
+}
+
+export interface PoolNextTier {
+  tierIndex: number;
+  targetAmount: number;
+  discountPercentage: number;
+  amountNeeded: number;
+  progressPercentage: number;
+}
+
+export interface PoolLiveProgress {
+  totalParticipants: number;
+  totalParticipations: number;
+  combinedEligibleCartValue: number;
+  accumulatedAmount: number;
+  totalProductQuantity: number;
+  targetMetric?: string;
+  targetAmount: number;
+  remainingTargetAmount: number;
+  targetReached: boolean;
+  targetEverReached: boolean;
+  currentDiscountPercentage: number;
+  currentTier: any;
+  nextTier: PoolNextTier | null;
+  nextTargetAmount: number;
+  remainingAmountToNextTarget: number;
+  nextDiscountPercentage: number;
+  overallTargetAmount: number;
+  overallProgressPercentage: number;
+  tiersProgress: PoolTierProgress[];
+  startsAt: string;
+  endsAt: string;
+  hasStarted: boolean;
+  hasEnded: boolean;
+  timeRemainingSeconds?: number;
+  secondsUntilStart?: number;
+}
+
+export interface PoolLiveStatus {
+  poolId: string;
+  storeId: string;
+  title: string;
+  status: PoolStatus;
+  isFinalized: boolean;
+  finalDiscountPercentage: number | null;
+  progress: PoolLiveProgress;
+}
+
 export interface PoolRecord {
   id: string;
   poolCode?: string;
@@ -48,6 +104,8 @@ export interface PoolRecord {
   currentParticipantCount?: number;
   currentTotalAmount?: number;
   distanceKm?: number;
+  liveStatus?: PoolLiveStatus;
+  progress?: PoolLiveProgress;
 }
 
 export interface PoolParticipationRecord {
@@ -58,13 +116,12 @@ export interface PoolParticipationRecord {
   storeId: string;
   itemsSnapshot: Array<{
     productId: string;
-    productName: string;
     quantity: number;
-    unitPrice: number;
-    subtotal: number;
+    price: number;
   }>;
+  status: 'SUBMITTED' | 'COMMITTED' | 'CONFIRMED' | 'FULFILLED' | 'CANCELLED';
   eligibleCartValue: number;
-  status: 'SUBMITTED' | 'ORDER_COMPLETED' | 'WITHDRAWN';
-  submittedAt: string;
-  withdrawnAt?: string | null;
+  appliedDiscountPercentage: number;
+  finalDiscountAmount?: number;
+  joinedAt: string;
 }

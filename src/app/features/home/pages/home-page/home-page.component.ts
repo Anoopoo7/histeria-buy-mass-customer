@@ -116,10 +116,11 @@ export const HOME_CATEGORIES: CategoryCard[] = [
 
                   <!-- Volume progress & discount tiers -->
                   <bm-pool-progress
+                    [progress]="pool.progress"
                     [currentAmount]="pool.currentTotalAmount || 0"
                     [targetAmount]="pool.targetAmount || 10000"
-                    [participantCount]="pool.currentParticipantCount || 4"
-                    [maxDiscount]="pool.maxDiscountPercentage || 15"
+                    [participantCountInput]="pool.currentParticipantCount || 0"
+                    [maxDiscountInput]="pool.maxDiscountPercentage || 15"
                     [tiers]="pool.tiers"
                   ></bm-pool-progress>
 

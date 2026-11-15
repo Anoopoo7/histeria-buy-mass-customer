@@ -7,6 +7,7 @@ import { PoolRecord } from '../../../../core/models/pool.model';
 import { LocationService } from '../../../../core/services/location.service';
 import { PoolService } from '../../../../core/services/pool.service';
 import { TranslationService } from '../../../../core/services/translation.service';
+import { parseTimestampMs } from '../../../../core/utils/date.utils';
 import { CountdownTimerComponent } from '../../../../shared/ui/countdown-timer/countdown-timer.component';
 import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-progress.component';
 
@@ -100,10 +101,11 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
 
                 <!-- Progress & Tiers -->
                 <bm-pool-progress
+                  [progress]="pool.progress"
                   [currentAmount]="pool.currentTotalAmount || 0"
                   [targetAmount]="pool.targetAmount || 10000"
-                  [participantCount]="pool.currentParticipantCount || 4"
-                  [maxDiscount]="pool.maxDiscountPercentage || 15"
+                  [participantCountInput]="pool.currentParticipantCount || 0"
+                  [maxDiscountInput]="pool.maxDiscountPercentage || 15"
                   [tiers]="pool.tiers"
                 ></bm-pool-progress>
 
@@ -362,7 +364,7 @@ export class PoolsPageComponent implements OnInit {
     const list = this.pools();
     if (this.selectedFilter() === 'ending') {
       return [...list].sort(
-        (a, b) => new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime(),
+        (a, b) => parseTimestampMs(a.endsAt) - parseTimestampMs(b.endsAt),
       );
     }
     if (this.selectedFilter() === 'popular') {
