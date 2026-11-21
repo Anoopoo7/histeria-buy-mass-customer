@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
+  AlertCircle,
   ArrowLeft,
   CheckCircle2,
   Clock,
   Info,
+  Lock,
   MapPin,
   ShieldCheck,
   ShoppingBag,
@@ -139,15 +141,15 @@ import { TranslationService } from '../../../../core/services/translation.servic
             </div>
           </div>
 
-          <!-- Applicable Pool Opportunity -->
+          <!-- Applicable Pool Opportunity OR No Active Pool Alert -->
           @if (activeStorePool(); as pool) {
             <div class="bm-card bm-pool-opp-card">
               <div class="bm-opp-head">
                 <lucide-icon [img]="SparklesIcon" [size]="18" class="text-primary"></lucide-icon>
-                <span class="bm-opp-title">Vehicle Pool Discount Eligible</span>
+                <span class="bm-opp-title">Vehicle Pool Active: {{ pool.title }}</span>
               </div>
               <p class="bm-opp-desc">
-                Commit this vehicle to <strong>{{ pool.title }}</strong> to earn up to {{ pool.maxDiscountPercentage }}% off showroom price!
+                Your booking will join <strong>{{ pool.title }}</strong> to earn up to {{ pool.maxDiscountPercentage || 15 }}% off showroom price!
               </p>
             </div>
           }
@@ -171,6 +173,11 @@ import { TranslationService } from '../../../../core/services/translation.servic
                 <span class="bm-summary-label">{{ t('checkout_group_discount') }}</span>
                 <span class="bm-summary-val text-success">Up to {{ activeStorePool()?.maxDiscountPercentage }}% off</span>
               </div>
+            } @else {
+              <div class="bm-summary-row">
+                <span class="bm-summary-label">{{ t('checkout_group_discount') }}</span>
+                <span class="bm-summary-val text-muted">No Active Pool</span>
+              </div>
             }
 
             <div class="bm-summary-divider"></div>
@@ -187,18 +194,32 @@ import { TranslationService } from '../../../../core/services/translation.servic
           <div class="bm-confirm-total-box">
             <span class="bm-total-sub">Total Payable at Showroom</span>
             <span class="bm-total-amount">₹{{ c.cartTotal | number }}</span>
+            @if (!isLoadingPool() && !activeStorePool()) {
+              <span class="bm-pool-req-text">Active pool required to confirm</span>
+            }
           </div>
 
           <button
             type="button"
             class="bm-btn-confirm-order"
-            [disabled]="isSubmitting()"
+            [class.is-disabled]="!activeStorePool()"
+            [disabled]="isSubmitting() || isLoadingPool() || !activeStorePool()"
             (click)="confirmOrder(c.id, c.store.id)"
           >
-            <lucide-icon [img]="CheckCircleIcon" [size]="18"></lucide-icon>
-            <span>{{ isSubmitting() ? 'Confirming...' : t('checkout_place_order') }}</span>
+            <lucide-icon [img]="activeStorePool() ? CheckCircleIcon : LockIcon" [size]="18"></lucide-icon>
+            <span>
+              @if (isSubmitting()) {
+                Confirming...
+              } @else if (isLoadingPool()) {
+                Checking Pool...
+              } @else if (!activeStorePool()) {
+                Active Pool Required
+              } @else {
+                {{ t('checkout_place_order') }}
+              }
+            </span>
           </button>
-          </div>
+        </div>
         } @else {
           <div class="bm-empty-checkout">
             <p>No active cart items found for this store.</p>
@@ -454,6 +475,13 @@ import { TranslationService } from '../../../../core/services/translation.servic
       color: var(--bm-color-text-primary);
     }
 
+    .bm-pool-req-text {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #dc2626;
+      margin-top: 2px;
+    }
+
     .bm-btn-confirm-order {
       height: 44px;
       padding: 0 18px;
@@ -465,9 +493,20 @@ import { TranslationService } from '../../../../core/services/translation.servic
       display: flex;
       align-items: center;
       gap: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
 
-      &:hover {
+      &:hover:not(:disabled) {
         background-color: var(--bm-color-primary-hover);
+      }
+
+      &:disabled,
+      &.is-disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        background-color: #94a3b8;
+        box-shadow: none;
       }
     }
 
@@ -509,10 +548,13 @@ export class CheckoutPageComponent implements OnInit {
   readonly ShieldCheckIcon = ShieldCheck;
   readonly SparklesIcon = Sparkles;
   readonly CheckCircleIcon = CheckCircle2;
+  readonly AlertCircleIcon = AlertCircle;
+  readonly LockIcon = Lock;
 
   readonly cart = signal<FormattedCart | null>(null);
   readonly activeStorePool = signal<PoolRecord | null>(null);
   readonly isLoading = signal<boolean>(true);
+  readonly isLoadingPool = signal<boolean>(true);
   readonly isSubmitting = signal<boolean>(false);
 
   ngOnInit(): void {
@@ -529,44 +571,47 @@ export class CheckoutPageComponent implements OnInit {
           error: () => this.isLoading.set(false),
         });
 
-        // Check for active pools for this store
-        this.poolService.getPools({ storeId, limit: 1 }).subscribe({
+        // Check for active pools for this store (ignoring location filter because user is in store checkout)
+        this.isLoadingPool.set(true);
+        this.poolService.getPools({ storeId, limit: 10, ignoreLocation: true }).subscribe({
           next: (res) => {
-            if (res.pools.length > 0) {
-              this.activeStorePool.set(res.pools[0]);
-            }
+            const active = res.pools.find((p) => p.status === 'ACTIVE' || !p.status);
+            this.activeStorePool.set(active || null);
+            this.isLoadingPool.set(false);
+          },
+          error: () => {
+            this.activeStorePool.set(null);
+            this.isLoadingPool.set(false);
           },
         });
       } else {
         this.isLoading.set(false);
+        this.isLoadingPool.set(false);
       }
     });
   }
 
   confirmOrder(cartId: string, storeId: string): void {
     const pool = this.activeStorePool();
-    this.isSubmitting.set(true);
-
-    if (pool) {
-      // In BuyMass group-buying model, cart submits to the store pool
-      this.poolService.participateInPool(pool.id, cartId).subscribe({
-        next: (res) => {
-          this.isSubmitting.set(false);
-          this.toast.success('Store order submitted to pool! You will receive pickup OTP on WhatsApp.');
-          this.cartService.loadCarts().subscribe();
-          this.router.navigate(['/orders']);
-        },
-        error: (err) => {
-          this.isSubmitting.set(false);
-          this.toast.error(err.message || 'Order submission could not be completed.');
-        },
-      });
-    } else {
-      // Direct store purchase simulation notice:
-      this.isSubmitting.set(false);
-      this.toast.info('Order placed! Present WhatsApp OTP at store pickup.');
-      this.router.navigate(['/orders']);
+    if (!pool) {
+      this.toast.error('Booking disabled: No active group-buying pool for this showroom.');
+      return;
     }
+
+    this.isSubmitting.set(true);
+    // In BuyMass group-buying model, orders strictly add to the active pool
+    this.poolService.participateInPool(pool.id, cartId).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.toast.success('Store order submitted to pool! You will receive pickup OTP on WhatsApp.');
+        this.cartService.loadCarts().subscribe();
+        this.router.navigate(['/orders']);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.toast.error(err.message || 'Order submission could not be completed.');
+      },
+    });
   }
 
   t(key: string, params?: Record<string, string | number>): string {
