@@ -178,17 +178,6 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
             }
           }
 
-          <!-- How BuyMass Works Explainer -->
-          <div class="bm-card bm-explainer-card">
-            <div class="bm-explainer-head">
-              <lucide-icon [img]="HelpCircleIcon" [size]="18" class="text-primary"></lucide-icon>
-              <h3 class="bm-explainer-title">{{ t('pool_how_it_works') }}</h3>
-            </div>
-            <p class="bm-explainer-text">
-              {{ t('pool_explanation') }}
-            </p>
-          </div>
-
           <!-- Customer Participation State -->
           @if (myParticipation(); as part) {
             <div class="bm-card bm-joined-card">
@@ -212,6 +201,17 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
               }
             </div>
           }
+
+          <!-- How BuyMass Works Explainer -->
+          <div class="bm-card bm-explainer-card">
+            <div class="bm-explainer-head">
+              <lucide-icon [img]="HelpCircleIcon" [size]="18" class="text-primary"></lucide-icon>
+              <h3 class="bm-explainer-title">{{ t('pool_how_it_works') }}</h3>
+            </div>
+            <p class="bm-explainer-text">
+              {{ t('pool_explanation') }}
+            </p>
+          </div>
         </div>
 
         <!-- Sticky Participation Action Bar -->
