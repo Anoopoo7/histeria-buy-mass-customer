@@ -161,8 +161,56 @@ import { TranslationService } from '../../../../core/services/translation.servic
           </div>
         </div>
       } @else if (isLoading()) {
-        <div class="bm-loading-box">
-          <div class="bm-order-skeleton bm-skeleton"></div>
+        <div class="bm-order-detail-skeleton-wrap is-skeleton">
+          <!-- Status Banner Skeleton -->
+          <div class="bm-card bm-status-banner">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div class="bm-skeleton bm-skeleton-title" style="width: 130px; height: 18px;"></div>
+              <div class="bm-skeleton" style="width: 75px; height: 22px; border-radius: var(--bm-radius-full);"></div>
+            </div>
+            <div class="bm-skeleton bm-skeleton-text" style="width: 80%;"></div>
+          </div>
+
+          <!-- Pickup Handover Code Card Skeleton -->
+          <div class="bm-card bm-pickup-code-box">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <div class="bm-skeleton bm-skeleton-circle" style="width: 20px; height: 20px;"></div>
+              <div class="bm-skeleton bm-skeleton-title" style="width: 140px; height: 16px;"></div>
+            </div>
+            <div class="bm-skeleton" style="height: 52px; width: 100%; border-radius: var(--bm-radius-md); margin-bottom: 8px;"></div>
+            <div class="bm-skeleton bm-skeleton-text" style="width: 70%;"></div>
+          </div>
+
+          <!-- Dealership Location Card Skeleton -->
+          <div class="bm-card bm-store-card">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div class="bm-skeleton bm-skeleton-circle" style="width: 18px; height: 18px;"></div>
+              <div class="bm-skeleton bm-skeleton-title" style="width: 150px; height: 16px;"></div>
+            </div>
+            <div class="bm-skeleton bm-skeleton-text" style="width: 60%;"></div>
+          </div>
+
+          <!-- Items Ordered Skeleton -->
+          <div class="bm-card bm-items-card">
+            <div class="bm-skeleton bm-skeleton-title" style="width: 130px; margin-bottom: 12px;"></div>
+            <div class="bm-item-row" style="padding: 8px 0; border-bottom: 1px solid var(--bm-color-border-subtle); display: flex; justify-content: space-between;">
+              <div class="bm-skeleton bm-skeleton-text" style="width: 55%;"></div>
+              <div class="bm-skeleton bm-skeleton-text" style="width: 70px;"></div>
+            </div>
+          </div>
+
+          <!-- Cost Breakdown Skeleton -->
+          <div class="bm-card bm-pricing-card">
+            <div class="bm-skeleton bm-skeleton-title" style="width: 110px; margin-bottom: 12px;"></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <div class="bm-skeleton bm-skeleton-text" style="width: 80px;"></div>
+              <div class="bm-skeleton bm-skeleton-text" style="width: 60px;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--bm-color-border);">
+              <div class="bm-skeleton bm-skeleton-title" style="width: 110px;"></div>
+              <div class="bm-skeleton bm-skeleton-title" style="width: 90px;"></div>
+            </div>
+          </div>
         </div>
       }
     </div>
@@ -453,10 +501,12 @@ import { TranslationService } from '../../../../core/services/translation.servic
       color: var(--bm-color-primary);
     }
 
-    .bm-order-skeleton {
-      height: 260px;
-      border-radius: var(--bm-radius-lg);
-      margin: 14px;
+    .bm-order-detail-skeleton-wrap.is-skeleton {
+      pointer-events: none;
+      padding: 0 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .bm-spin {

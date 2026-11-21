@@ -84,7 +84,74 @@ img {
   border-radius: var(--bm-radius-md);
 }
 
+.bm-skeleton-text {
+  height: 12px;
+  border-radius: var(--bm-radius-xs);
+}
+
+.bm-skeleton-title {
+  height: 18px;
+  border-radius: var(--bm-radius-xs);
+}
+
+.bm-skeleton-circle {
+  border-radius: var(--bm-radius-full);
+}
+
+.bm-skeleton-btn {
+  height: 38px;
+  border-radius: var(--bm-radius-md);
+}
+
 @keyframes bm-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+// Page Transition & View Transition Animations
+::view-transition-old(root) {
+  animation: 160ms cubic-bezier(0.4, 0, 1, 1) both bmPageFadeOut;
+}
+
+::view-transition-new(root) {
+  animation: 220ms cubic-bezier(0, 0, 0.2, 1) both bmPageFadeIn;
+}
+
+@keyframes bmPageFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+}
+
+@keyframes bmPageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Smooth fallback enter animation for routed page components
+.bm-main-content router-outlet + * {
+  animation: bmPageSlideEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+@keyframes bmPageSlideEnter {
+  from {
+    opacity: 0.8;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

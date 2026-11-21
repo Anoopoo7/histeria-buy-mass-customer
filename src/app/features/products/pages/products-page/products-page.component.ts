@@ -26,7 +26,17 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
       @if (isLoading()) {
         <div class="bm-prod-grid">
           @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-            <div class="bm-grid-skeleton bm-skeleton"></div>
+            <div class="bm-card is-skeleton">
+              <div class="bm-card-img-box bm-skeleton"></div>
+              <div class="bm-card-meta">
+                <div class="bm-skeleton bm-skeleton-text" style="width: 45%; margin-bottom: 3px;"></div>
+                <div class="bm-skeleton bm-skeleton-text" style="width: 85%; height: 14px; margin-bottom: 4px;"></div>
+                <div class="bm-skeleton bm-skeleton-text" style="width: 50%; height: 15px;"></div>
+              </div>
+              <div style="padding: 0 8px 8px;">
+                <div class="bm-skeleton" style="height: 30px; border-radius: var(--bm-radius-md);"></div>
+              </div>
+            </div>
           }
         </div>
       } @else if (products().length > 0) {
@@ -206,9 +216,8 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
       }
     }
 
-    .bm-grid-skeleton {
-      height: 220px;
-      border-radius: var(--bm-radius-lg);
+    .bm-card.is-skeleton {
+      pointer-events: none;
     }
 
     .bm-empty-catalog {

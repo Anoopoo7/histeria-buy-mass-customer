@@ -95,10 +95,33 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
       <!-- Results or Initial State -->
       @if (isLoading()) {
-        <div class="bm-loading-box">
-          <div class="bm-search-skeleton bm-skeleton"></div>
-          <div class="bm-search-skeleton bm-skeleton"></div>
-          <div class="bm-search-skeleton bm-skeleton"></div>
+        <div class="bm-results-container is-skeleton">
+          <div class="bm-res-section">
+            <div class="bm-skeleton bm-skeleton-title" style="width: 130px; margin-bottom: 10px;"></div>
+            <div class="bm-res-prod-grid">
+              @for (i of [1, 2]; track i) {
+                <div class="bm-res-prod-card is-skeleton">
+                  <div class="bm-prod-img bm-skeleton" style="height: 120px;"></div>
+                  <div class="bm-prod-meta" style="padding: 8px;">
+                    <div class="bm-skeleton bm-skeleton-text" style="width: 50%; margin-bottom: 4px;"></div>
+                    <div class="bm-skeleton bm-skeleton-title" style="width: 80%; height: 14px; margin-bottom: 6px;"></div>
+                    <div class="bm-skeleton bm-skeleton-text" style="width: 40%; height: 15px;"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="bm-res-section" style="margin-top: 14px;">
+            <div class="bm-skeleton bm-skeleton-title" style="width: 110px; margin-bottom: 10px;"></div>
+            <div class="bm-res-store-card is-skeleton">
+              <div class="bm-store-img-box bm-skeleton"></div>
+              <div class="bm-store-meta">
+                <div class="bm-skeleton bm-skeleton-title" style="width: 65%; height: 15px; margin-bottom: 4px;"></div>
+                <div class="bm-skeleton bm-skeleton-text" style="width: 45%;"></div>
+              </div>
+            </div>
+          </div>
         </div>
       } @else if (searchQuery.trim().length === 0) {
         <!-- Recent Searches -->
@@ -526,10 +549,8 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
       }
     }
 
-    .bm-search-skeleton {
-      height: 70px;
-      border-radius: var(--bm-radius-md);
-      margin-bottom: 8px;
+    .bm-results-container.is-skeleton {
+      pointer-events: none;
     }
   `],
 })

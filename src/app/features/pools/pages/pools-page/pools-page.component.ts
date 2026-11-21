@@ -66,9 +66,25 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
       <!-- Pools Grid / List -->
       @if (isLoading()) {
-        <div class="bm-pools-loading">
+        <div class="bm-pools-grid">
           @for (i of [1, 2, 3]; track i) {
-            <div class="bm-pool-skeleton bm-skeleton"></div>
+            <div class="bm-pool-card is-skeleton">
+              <div class="bm-card-media bm-skeleton" style="height: 160px;"></div>
+              <div class="bm-card-body">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 110px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 45px;"></div>
+                </div>
+                <div class="bm-skeleton bm-skeleton-title" style="width: 80%; height: 18px; margin-bottom: 12px;"></div>
+                <div class="bm-skeleton" style="height: 6px; width: 100%; border-radius: 3px; margin-bottom: 10px;"></div>
+                <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                  <div class="bm-skeleton" style="height: 36px; flex: 1; border-radius: var(--bm-radius-sm);"></div>
+                  <div class="bm-skeleton" style="height: 36px; flex: 1; border-radius: var(--bm-radius-sm);"></div>
+                  <div class="bm-skeleton" style="height: 36px; flex: 1; border-radius: var(--bm-radius-sm);"></div>
+                </div>
+                <div class="bm-skeleton bm-skeleton-btn" style="width: 100%;"></div>
+              </div>
+            </div>
           }
         </div>
       } @else if (filteredPools().length > 0) {
@@ -290,10 +306,8 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
       }
     }
 
-    .bm-pool-skeleton {
-      height: 240px;
-      border-radius: var(--bm-radius-lg);
-      margin-bottom: 10px;
+    .bm-pool-card.is-skeleton {
+      pointer-events: none;
     }
 
     .bm-empty-pools {

@@ -36,7 +36,68 @@ import { TranslationService } from '../../../../core/services/translation.servic
         <h1 class="bm-checkout-title">{{ t('checkout_title') }}</h1>
       </div>
 
-      @if (cart(); as c) {
+      @if (isLoading()) {
+        <div class="bm-checkout-content is-skeleton">
+          <!-- Store Details Card Skeleton -->
+          <div class="bm-card bm-store-box">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div class="bm-skeleton bm-skeleton-circle" style="width: 20px; height: 20px;"></div>
+              <div class="bm-skeleton bm-skeleton-title" style="width: 160px; height: 18px;"></div>
+            </div>
+            <div class="bm-skeleton bm-skeleton-text" style="width: 220px;"></div>
+          </div>
+
+          <!-- Fulfilment Method Card Skeleton -->
+          <div class="bm-card bm-fulfilment-box">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div class="bm-skeleton bm-skeleton-circle" style="width: 20px; height: 20px;"></div>
+              <div class="bm-skeleton bm-skeleton-title" style="width: 140px; height: 16px;"></div>
+            </div>
+            <div class="bm-skeleton bm-skeleton-text" style="width: 85%; margin-bottom: 8px;"></div>
+            <div class="bm-skeleton" style="height: 38px; border-radius: var(--bm-radius-sm);"></div>
+          </div>
+
+          <!-- Items Snapshot Skeleton -->
+          <div class="bm-card bm-items-box">
+            <div class="bm-skeleton bm-skeleton-title" style="width: 150px; margin-bottom: 12px;"></div>
+            <div class="bm-items-list">
+              @for (i of [1, 2]; track i) {
+                <div class="bm-checkout-item" style="padding: 8px 0; border-bottom: 1px solid var(--bm-color-border-subtle); display: flex; justify-content: space-between;">
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 60%;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 70px;"></div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Summary Box Skeleton -->
+          <div class="bm-card bm-summary-box">
+            <div class="bm-skeleton bm-skeleton-title" style="width: 120px; margin-bottom: 14px;"></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <div class="bm-skeleton bm-skeleton-text" style="width: 90px;"></div>
+              <div class="bm-skeleton bm-skeleton-text" style="width: 60px;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <div class="bm-skeleton bm-skeleton-text" style="width: 110px;"></div>
+              <div class="bm-skeleton bm-skeleton-text" style="width: 40px;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--bm-color-border);">
+              <div class="bm-skeleton bm-skeleton-title" style="width: 100px;"></div>
+              <div class="bm-skeleton bm-skeleton-title" style="width: 80px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Bottom Bar Skeleton -->
+        <div class="bm-checkout-bottom-bar is-skeleton">
+          <div>
+            <div class="bm-skeleton bm-skeleton-text" style="width: 60px; margin-bottom: 4px;"></div>
+            <div class="bm-skeleton bm-skeleton-title" style="width: 90px; height: 22px;"></div>
+          </div>
+          <div class="bm-skeleton bm-skeleton-btn" style="width: 160px; height: 44px;"></div>
+        </div>
+      } @else {
+        @if (cart(); as c) {
         <div class="bm-checkout-content">
           <!-- Store Details Card -->
           <div class="bm-card bm-store-box">
@@ -137,12 +198,13 @@ import { TranslationService } from '../../../../core/services/translation.servic
             <lucide-icon [img]="CheckCircleIcon" [size]="18"></lucide-icon>
             <span>{{ isSubmitting() ? 'Confirming...' : t('checkout_place_order') }}</span>
           </button>
-        </div>
-      } @else {
-        <div class="bm-empty-checkout">
-          <p>No active cart items found for this store.</p>
-          <a routerLink="/cart" class="bm-btn-return">Return to Cart</a>
-        </div>
+          </div>
+        } @else {
+          <div class="bm-empty-checkout">
+            <p>No active cart items found for this store.</p>
+            <a routerLink="/cart" class="bm-btn-return">Return to Cart</a>
+          </div>
+        }
       }
     </div>
   `,
@@ -409,6 +471,11 @@ import { TranslationService } from '../../../../core/services/translation.servic
       }
     }
 
+    .bm-checkout-content.is-skeleton,
+    .bm-checkout-bottom-bar.is-skeleton {
+      pointer-events: none;
+    }
+
     .bm-empty-checkout {
       padding: 48px 16px;
       text-align: center;
@@ -445,14 +512,22 @@ export class CheckoutPageComponent implements OnInit {
 
   readonly cart = signal<FormattedCart | null>(null);
   readonly activeStorePool = signal<PoolRecord | null>(null);
+  readonly isLoading = signal<boolean>(true);
   readonly isSubmitting = signal<boolean>(false);
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       const storeId = params['storeId'];
       if (storeId) {
-        const matchingCart = this.cartService.getStoreCart(storeId);
-        this.cart.set(matchingCart || null);
+        this.isLoading.set(true);
+        this.cartService.loadCarts().subscribe({
+          next: () => {
+            const matchingCart = this.cartService.getStoreCart(storeId);
+            this.cart.set(matchingCart || null);
+            this.isLoading.set(false);
+          },
+          error: () => this.isLoading.set(false),
+        });
 
         // Check for active pools for this store
         this.poolService.getPools({ storeId, limit: 1 }).subscribe({
@@ -462,6 +537,8 @@ export class CheckoutPageComponent implements OnInit {
             }
           },
         });
+      } else {
+        this.isLoading.set(false);
       }
     });
   }

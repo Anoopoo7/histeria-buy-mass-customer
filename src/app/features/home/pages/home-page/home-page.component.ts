@@ -86,7 +86,20 @@ export const HOME_CATEGORIES: CategoryCard[] = [
         @if (isLoadingPools()) {
           <div class="bm-carousel hide-scroll">
             @for (i of [1, 2]; track i) {
-              <div class="bm-pool-card-skeleton bm-skeleton"></div>
+              <div class="bm-pool-card is-skeleton">
+                <div class="bm-pool-img-wrap bm-skeleton"></div>
+                <div class="bm-pool-body">
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 45%; margin-bottom: 6px;"></div>
+                  <div class="bm-skeleton bm-skeleton-title" style="width: 80%; margin-bottom: 12px;"></div>
+                  <div class="bm-skeleton" style="height: 6px; width: 100%; border-radius: 3px; margin-bottom: 10px;"></div>
+                  <div class="bm-pool-tiers-preview">
+                    <div class="bm-tier-preview-pill is-skeleton bm-skeleton"></div>
+                    <div class="bm-tier-preview-pill is-skeleton bm-skeleton"></div>
+                    <div class="bm-tier-preview-pill is-skeleton bm-skeleton"></div>
+                  </div>
+                  <div class="bm-skeleton bm-skeleton-btn" style="width: 100%; margin-top: 10px;"></div>
+                </div>
+              </div>
             }
           </div>
         } @else if (pools().length > 0) {
@@ -178,7 +191,17 @@ export const HOME_CATEGORIES: CategoryCard[] = [
         @if (isLoadingStores()) {
           <div class="bm-grid-stores">
             @for (i of [1, 2, 3]; track i) {
-              <div class="bm-store-card-skeleton bm-skeleton"></div>
+              <div class="bm-store-card is-skeleton">
+                <div class="bm-store-avatar bm-skeleton"></div>
+                <div class="bm-store-info">
+                  <div class="bm-store-row">
+                    <div class="bm-skeleton bm-skeleton-text" style="width: 55%; height: 14px;"></div>
+                    <div class="bm-skeleton bm-skeleton-text" style="width: 38px;"></div>
+                  </div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 70%; margin-top: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 85%; margin-top: 4px;"></div>
+                </div>
+              </div>
             }
           </div>
         } @else if (stores().length > 0) {
@@ -234,7 +257,17 @@ export const HOME_CATEGORIES: CategoryCard[] = [
         @if (isLoadingProducts()) {
           <div class="bm-product-grid">
             @for (i of [1, 2, 3, 4]; track i) {
-              <div class="bm-product-skeleton bm-skeleton"></div>
+              <div class="bm-product-card is-skeleton">
+                <div class="bm-product-img-box bm-skeleton"></div>
+                <div class="bm-product-meta">
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 45%; margin-bottom: 3px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 85%; height: 14px; margin-bottom: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 50%; height: 15px;"></div>
+                </div>
+                <div style="padding: 0 10px 10px;">
+                  <div class="bm-skeleton" style="height: 32px; border-radius: var(--bm-radius-md);"></div>
+                </div>
+              </div>
             }
           </div>
         } @else if (products().length > 0) {
@@ -787,20 +820,36 @@ export const HOME_CATEGORIES: CategoryCard[] = [
     }
 
     // Skeletons
-    .bm-pool-card-skeleton {
-      flex: 0 0 280px;
-      height: 260px;
-      border-radius: var(--bm-radius-lg);
+    .bm-pool-card.is-skeleton {
+      pointer-events: none;
+
+      .bm-pool-img-wrap {
+        height: 140px;
+      }
+
+      .bm-pool-tiers-preview {
+        display: flex;
+        gap: 6px;
+      }
+
+      .bm-tier-preview-pill.is-skeleton {
+        height: 36px;
+        flex: 1;
+        border-radius: var(--bm-radius-sm);
+      }
     }
 
-    .bm-store-card-skeleton {
-      height: 72px;
-      border-radius: var(--bm-radius-lg);
+    .bm-store-card.is-skeleton {
+      pointer-events: none;
+
+      .bm-store-avatar {
+        width: 56px;
+        height: 56px;
+      }
     }
 
-    .bm-product-skeleton {
-      height: 220px;
-      border-radius: var(--bm-radius-lg);
+    .bm-product-card.is-skeleton {
+      pointer-events: none;
     }
 
     .bm-empty-banner {

@@ -102,11 +102,49 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
 
       <!-- Tab Content -->
       @if (isLoading()) {
-        <div class="bm-loading-list">
-          @for (i of [1, 2, 3, 4]; track i) {
-            <div class="bm-card-skeleton bm-skeleton"></div>
-          }
-        </div>
+        @if (activeTab() === 'products') {
+          <div class="bm-product-grid">
+            @for (i of [1, 2, 3, 4]; track i) {
+              <div class="bm-product-card is-skeleton">
+                <div class="bm-prod-img-wrap bm-skeleton"></div>
+                <div class="bm-prod-meta">
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 45%; margin-bottom: 3px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 80%; height: 14px; margin-bottom: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 45%; height: 15px;"></div>
+                </div>
+                <div style="padding: 0 8px 8px;">
+                  <div class="bm-skeleton" style="height: 30px; border-radius: var(--bm-radius-md);"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else if (activeTab() === 'pools') {
+          <div class="bm-pools-list">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="bm-pool-row-card is-skeleton">
+                <div class="bm-pool-thumb bm-skeleton"></div>
+                <div class="bm-pool-row-info">
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 90px; margin-bottom: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-title" style="width: 75%; height: 15px; margin-bottom: 6px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 120px;"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="bm-stores-list">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="bm-store-row-card is-skeleton">
+                <div class="bm-store-img-box bm-skeleton"></div>
+                <div class="bm-store-row-info">
+                  <div class="bm-skeleton bm-skeleton-title" style="width: 60%; height: 15px; margin-bottom: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 40%; margin-bottom: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 75%;"></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
       } @else {
         <!-- Products View -->
         @if (activeTab() === 'products') {
@@ -534,9 +572,10 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
       color: var(--bm-color-text-secondary);
     }
 
-    .bm-card-skeleton {
-      height: 90px;
-      border-radius: var(--bm-radius-md);
+    .bm-product-card.is-skeleton,
+    .bm-pool-row-card.is-skeleton,
+    .bm-store-row-card.is-skeleton {
+      pointer-events: none;
     }
 
     .bm-loading-list {

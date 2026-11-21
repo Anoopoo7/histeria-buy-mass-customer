@@ -78,9 +78,39 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
         <!-- Store Carts List -->
         @if (isLoading()) {
-          <div class="bm-loading-list">
+          <div class="bm-carts-container">
             @for (i of [1, 2]; track i) {
-              <div class="bm-cart-skeleton bm-skeleton"></div>
+              <div class="bm-store-cart-card is-skeleton">
+                <div class="bm-store-cart-head">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="bm-skeleton bm-skeleton-circle" style="width: 20px; height: 20px;"></div>
+                    <div class="bm-skeleton bm-skeleton-title" style="width: 140px; height: 16px;"></div>
+                  </div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 48px;"></div>
+                </div>
+
+                <div class="bm-items-list">
+                  @for (j of [1, 2]; track j) {
+                    <div class="bm-item-row">
+                      <div class="bm-item-thumb bm-skeleton"></div>
+                      <div class="bm-item-details">
+                        <div class="bm-skeleton bm-skeleton-title" style="width: 70%; height: 14px; margin-bottom: 6px;"></div>
+                        <div class="bm-skeleton bm-skeleton-text" style="width: 40%; height: 12px; margin-bottom: 4px;"></div>
+                        <div class="bm-skeleton bm-skeleton-text" style="width: 30%;"></div>
+                      </div>
+                      <div class="bm-skeleton" style="width: 80px; height: 32px; border-radius: var(--bm-radius-full);"></div>
+                    </div>
+                  }
+                </div>
+
+                <div class="bm-store-cart-footer">
+                  <div class="bm-cart-totals">
+                    <div class="bm-skeleton bm-skeleton-text" style="width: 70px; margin-bottom: 4px;"></div>
+                    <div class="bm-skeleton bm-skeleton-title" style="width: 90px; height: 18px;"></div>
+                  </div>
+                  <div class="bm-skeleton bm-skeleton-btn" style="width: 150px; height: 40px;"></div>
+                </div>
+              </div>
             }
           </div>
         } @else if (activeCarts().length > 0) {
@@ -242,9 +272,32 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
         <!-- Loading State -->
         @if (isSubmittedLoading()) {
-          <div class="bm-loading-list">
+          <div class="bm-carts-container">
             @for (i of [1, 2]; track i) {
-              <div class="bm-cart-skeleton bm-skeleton"></div>
+              <div class="bm-store-cart-card is-submitted-card is-skeleton">
+                <div class="bm-store-cart-head">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="bm-skeleton bm-skeleton-circle" style="width: 20px; height: 20px;"></div>
+                    <div class="bm-skeleton bm-skeleton-title" style="width: 130px; height: 16px;"></div>
+                  </div>
+                  <div class="bm-skeleton" style="width: 100px; height: 24px; border-radius: var(--bm-radius-full);"></div>
+                </div>
+
+                <div class="bm-items-list">
+                  <div class="bm-item-row is-readonly">
+                    <div class="bm-item-thumb bm-skeleton"></div>
+                    <div class="bm-item-details">
+                      <div class="bm-skeleton bm-skeleton-title" style="width: 70%; height: 14px; margin-bottom: 6px;"></div>
+                      <div class="bm-skeleton bm-skeleton-text" style="width: 40%;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bm-submitted-footer">
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 120px;"></div>
+                  <div class="bm-skeleton" style="width: 90px; height: 28px; border-radius: var(--bm-radius-md);"></div>
+                </div>
+              </div>
             }
           </div>
         } @else if (activeSubmittedCarts().length > 0) {
@@ -923,10 +976,8 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
       cursor: pointer;
     }
 
-    .bm-cart-skeleton {
-      height: 180px;
-      border-radius: var(--bm-radius-lg);
-      margin-bottom: 12px;
+    .bm-store-cart-card.is-skeleton {
+      pointer-events: none;
     }
 
     .bm-loading-list {

@@ -25,9 +25,19 @@ import { TranslationService } from '../../../../core/services/translation.servic
 
       <!-- Stores Listing -->
       @if (isLoading()) {
-        <div class="bm-stores-loading">
+        <div class="bm-stores-list">
           @for (i of [1, 2, 3, 4]; track i) {
-            <div class="bm-store-skeleton bm-skeleton"></div>
+            <div class="bm-store-card is-skeleton">
+              <div class="bm-store-avatar bm-skeleton"></div>
+              <div class="bm-store-body">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                  <div class="bm-skeleton bm-skeleton-title" style="width: 55%; height: 16px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 45px;"></div>
+                </div>
+                <div class="bm-skeleton bm-skeleton-text" style="width: 70%; margin-bottom: 4px;"></div>
+                <div class="bm-skeleton bm-skeleton-text" style="width: 85%;"></div>
+              </div>
+            </div>
           }
         </div>
       } @else if (stores().length > 0) {
@@ -206,10 +216,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
       flex-shrink: 0;
     }
 
-    .bm-store-skeleton {
-      height: 80px;
-      border-radius: var(--bm-radius-lg);
-      margin-bottom: 8px;
+    .bm-store-card.is-skeleton {
+      pointer-events: none;
     }
 
     .bm-stores-empty {

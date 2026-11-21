@@ -301,7 +301,16 @@ import { TranslationService } from '../../../../core/services/translation.servic
         @if (isLoadingProducts()) {
           <div class="bm-products-grid">
             @for (i of [1, 2, 3, 4]; track i) {
-              <div class="bm-prod-skeleton bm-skeleton"></div>
+              <div class="bm-prod-card is-skeleton">
+                <div class="bm-prod-img-box bm-skeleton"></div>
+                <div class="bm-prod-info">
+                  <div class="bm-skeleton bm-skeleton-title" style="width: 75%; height: 14px; margin-bottom: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 45%; height: 15px;"></div>
+                </div>
+                <div style="padding: 0 4px 4px;">
+                  <div class="bm-skeleton" style="height: 28px; border-radius: var(--bm-radius-sm);"></div>
+                </div>
+              </div>
             }
           </div>
         } @else if (products().length > 0) {
@@ -1017,9 +1026,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
       cursor: pointer;
     }
 
-    .bm-prod-skeleton {
-      height: 180px;
-      border-radius: var(--bm-radius-md);
+    .bm-prod-card.is-skeleton {
+      pointer-events: none;
     }
 
     .bm-empty-catalog {

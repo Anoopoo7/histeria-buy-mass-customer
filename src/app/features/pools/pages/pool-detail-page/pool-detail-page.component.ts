@@ -277,8 +277,59 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
           }
         </div>
       } @else if (isLoading()) {
-        <div class="bm-loading-box">
-          <div class="bm-detail-skeleton bm-skeleton"></div>
+        <div class="bm-pool-detail-skeleton-wrap">
+          <!-- Campaign Header Media Skeleton -->
+          <div class="bm-campaign-media bm-skeleton" style="height: 200px;"></div>
+
+          <div class="bm-content-container">
+            <!-- Pool Hero Header Card Skeleton -->
+            <div class="bm-card bm-pool-header-card is-skeleton">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <div class="bm-skeleton bm-skeleton-text" style="width: 120px;"></div>
+                <div class="bm-skeleton" style="width: 50px; height: 16px; border-radius: var(--bm-radius-full);"></div>
+              </div>
+              <div class="bm-skeleton bm-skeleton-title" style="width: 75%; height: 22px; margin-bottom: 14px;"></div>
+
+              <!-- Volume progress skeleton -->
+              <div class="bm-skeleton" style="height: 14px; width: 45%; margin-bottom: 8px;"></div>
+              <div class="bm-skeleton" style="height: 8px; width: 100%; border-radius: 4px; margin-bottom: 12px;"></div>
+              <div style="display: flex; gap: 8px;">
+                <div class="bm-skeleton" style="height: 48px; flex: 1; border-radius: var(--bm-radius-md);"></div>
+                <div class="bm-skeleton" style="height: 48px; flex: 1; border-radius: var(--bm-radius-md);"></div>
+                <div class="bm-skeleton" style="height: 48px; flex: 1; border-radius: var(--bm-radius-md);"></div>
+              </div>
+            </div>
+
+            <!-- Dealership Information Card Skeleton -->
+            <div class="bm-card bm-store-info-card is-skeleton">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="bm-skeleton bm-skeleton-circle" style="width: 38px; height: 38px; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <div class="bm-skeleton bm-skeleton-title" style="width: 140px; margin-bottom: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 80px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Eligible Vehicle Items List Skeleton -->
+            <div class="bm-card bm-pool-cart-card is-skeleton">
+              <div class="bm-skeleton bm-skeleton-title" style="width: 180px; margin-bottom: 12px;"></div>
+              @for (i of [1, 2]; track i) {
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--bm-color-border-subtle);">
+                  <div class="bm-skeleton" style="width: 44px; height: 44px; border-radius: var(--bm-radius-sm); flex-shrink: 0;"></div>
+                  <div style="flex: 1;">
+                    <div class="bm-skeleton bm-skeleton-text" style="width: 65%; margin-bottom: 4px;"></div>
+                    <div class="bm-skeleton bm-skeleton-text" style="width: 40px;"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Bottom Action Bar Skeleton -->
+          <div class="bm-bottom-action-bar is-skeleton">
+            <div class="bm-skeleton" style="width: 100%; height: 44px; border-radius: var(--bm-radius-md);"></div>
+          </div>
         </div>
       }
     </div>
@@ -827,10 +878,20 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
       }
     }
 
-    .bm-detail-skeleton {
-      height: 300px;
-      border-radius: var(--bm-radius-lg);
-      margin: 14px;
+    .bm-pool-detail-skeleton-wrap {
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+    }
+
+    .bm-pool-header-card.is-skeleton,
+    .bm-store-info-card.is-skeleton,
+    .bm-pool-cart-card.is-skeleton {
+      pointer-events: none;
+    }
+
+    .bm-bottom-action-bar.is-skeleton {
+      pointer-events: none;
     }
   `],
 })

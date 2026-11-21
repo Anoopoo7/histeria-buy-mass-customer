@@ -75,9 +75,34 @@ import { TranslationService } from '../../../../core/services/translation.servic
 
       <!-- Orders List -->
       @if (isLoading()) {
-        <div class="bm-loading-list">
+        <div class="bm-orders-list">
           @for (i of [1, 2, 3]; track i) {
-            <div class="bm-order-skeleton bm-skeleton"></div>
+            <div class="bm-order-card is-skeleton">
+              <div class="bm-order-head">
+                <div>
+                  <div class="bm-skeleton bm-skeleton-title" style="width: 110px; height: 16px; margin-bottom: 4px;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 80px;"></div>
+                </div>
+                <div class="bm-skeleton" style="width: 70px; height: 22px; border-radius: var(--bm-radius-full);"></div>
+              </div>
+
+              <div class="bm-order-store">
+                <div class="bm-skeleton bm-skeleton-circle" style="width: 14px; height: 14px;"></div>
+                <div class="bm-skeleton bm-skeleton-text" style="width: 140px;"></div>
+              </div>
+
+              <div class="bm-order-items">
+                <div class="bm-order-item-line">
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 60%;"></div>
+                  <div class="bm-skeleton bm-skeleton-text" style="width: 60px;"></div>
+                </div>
+              </div>
+
+              <div class="bm-order-foot">
+                <div class="bm-skeleton bm-skeleton-title" style="width: 90px; height: 18px;"></div>
+                <div class="bm-skeleton bm-skeleton-text" style="width: 50px;"></div>
+              </div>
+            </div>
           }
         </div>
       } @else if (filteredOrders().length > 0) {
@@ -399,10 +424,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
       border-radius: var(--bm-radius-md);
     }
 
-    .bm-order-skeleton {
-      height: 120px;
-      border-radius: var(--bm-radius-lg);
-      margin-bottom: 10px;
+    .bm-order-card.is-skeleton {
+      pointer-events: none;
     }
   `],
 })

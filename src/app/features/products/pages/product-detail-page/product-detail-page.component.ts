@@ -377,9 +377,55 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
           </button>
         </div>
       } @else if (isLoading()) {
-        <div class="bm-loading-placeholder">
-          <div class="bm-gallery-skeleton bm-skeleton"></div>
-          <div class="bm-info-skeleton bm-skeleton"></div>
+        <div class="bm-pdp-skeleton-container">
+          <!-- Gallery Box Skeleton -->
+          <div class="bm-gallery-box is-skeleton">
+            <div class="bm-main-img-wrapper bm-skeleton" style="height: 250px;"></div>
+            <div class="bm-thumb-strip hide-scroll" style="margin-top: 8px; display: flex; gap: 8px;">
+              @for (i of [1, 2, 3, 4]; track i) {
+                <div class="bm-skeleton" style="width: 56px; height: 56px; border-radius: var(--bm-radius-md); flex-shrink: 0;"></div>
+              }
+            </div>
+          </div>
+
+          <!-- Product Core Info Card Skeleton -->
+          <div class="bm-info-card is-skeleton">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div class="bm-skeleton bm-skeleton-circle" style="width: 24px; height: 24px;"></div>
+              <div class="bm-skeleton bm-skeleton-text" style="width: 140px;"></div>
+            </div>
+            <div class="bm-skeleton bm-skeleton-title" style="width: 75%; height: 22px; margin-bottom: 8px;"></div>
+            <div class="bm-skeleton bm-skeleton-text" style="width: 35%; margin-bottom: 16px;"></div>
+
+            <!-- Price line skeleton -->
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+              <div class="bm-skeleton" style="width: 110px; height: 28px; border-radius: var(--bm-radius-sm);"></div>
+              <div class="bm-skeleton" style="width: 60px; height: 20px; border-radius: var(--bm-radius-sm);"></div>
+            </div>
+
+            <!-- Trust badges skeleton -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding-top: 12px; border-top: 1px solid var(--bm-color-border-subtle);">
+              <div class="bm-skeleton" style="height: 48px; border-radius: var(--bm-radius-md);"></div>
+              <div class="bm-skeleton" style="height: 48px; border-radius: var(--bm-radius-md);"></div>
+              <div class="bm-skeleton" style="height: 48px; border-radius: var(--bm-radius-md);"></div>
+            </div>
+          </div>
+
+          <!-- Specs Card Skeleton -->
+          <div class="bm-specs-card is-skeleton">
+            <div class="bm-skeleton bm-skeleton-title" style="width: 120px; margin-bottom: 12px;"></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              @for (i of [1, 2, 3, 4]; track i) {
+                <div class="bm-skeleton" style="height: 52px; border-radius: var(--bm-radius-md);"></div>
+              }
+            </div>
+          </div>
+
+          <!-- Sticky Bottom Action Bar Skeleton -->
+          <div class="bm-bottom-action-bar is-skeleton">
+            <div class="bm-skeleton" style="width: 100px; height: 44px; border-radius: var(--bm-radius-md);"></div>
+            <div class="bm-skeleton" style="flex: 1.2; height: 44px; border-radius: var(--bm-radius-md);"></div>
+          </div>
         </div>
       } @else {
         <div class="bm-error-state">
@@ -1169,21 +1215,23 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
       }
     }
 
-    .bm-loading-placeholder {
-      padding: 14px;
+    .bm-pdp-skeleton-container {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      pointer-events: none;
     }
 
-    .bm-gallery-skeleton {
-      height: 250px;
+    .bm-specs-card.is-skeleton {
+      background-color: var(--bm-color-surface);
       border-radius: var(--bm-radius-lg);
+      padding: 14px;
+      border: 1px solid var(--bm-color-border);
+      box-shadow: var(--bm-shadow-xs);
     }
 
-    .bm-info-skeleton {
-      height: 200px;
-      border-radius: var(--bm-radius-lg);
+    .bm-bottom-action-bar.is-skeleton {
+      pointer-events: none;
     }
 
     .bm-error-state {
