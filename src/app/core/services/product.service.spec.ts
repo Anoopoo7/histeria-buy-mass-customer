@@ -12,19 +12,19 @@ describe('ProductService', () => {
     product: {
       id: 'prod-123',
       storeId: 'store-456',
-      storeName: 'Kochi Fresh Grocery',
-      name: 'Kerala Matta Rice (5kg)',
-      description: 'Premium Palakkadan Matta Rice',
-      category: 'Groceries',
-      brand: 'Double Horse',
-      sku: 'DH-MATTA-5KG',
-      price: 320,
-      originalPrice: 380,
-      unit: '5kg bag',
-      primaryImageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c',
+      storeName: 'Kochi Royal Enfield Showroom',
+      name: 'Hunter 350 Dapper',
+      description: 'Compact, muscular 350cc roadster',
+      category: 'Motorcycles & Bikes',
+      brand: 'Royal Enfield',
+      sku: 'RE-HNT-350-DPR',
+      price: 169000,
+      originalPrice: 178000,
+      unit: 'vehicle',
+      primaryImageUrl: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc',
       images: [
-        { id: '1', url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c' },
-        { id: '2', url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?v=2' },
+        { id: '1', url: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc' },
+        { id: '2', url: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?v=2' },
       ],
       status: 'ACTIVE',
     },
@@ -53,12 +53,12 @@ describe('ProductService', () => {
     service.getProductById('prod-123').subscribe((prod) => {
       expect(apiClientSpy.get).toHaveBeenCalledWith('/api/v1/products/prod-123');
       expect(prod).toBeTruthy();
-      expect(prod?.name).toBe('Kerala Matta Rice (5kg)');
-      expect(prod?.price).toBe(320);
-      expect(prod?.originalPrice).toBe(380);
-      expect(prod?.brand).toBe('Double Horse');
+      expect(prod?.name).toBe('Hunter 350 Dapper');
+      expect(prod?.price).toBe(169000);
+      expect(prod?.originalPrice).toBe(178000);
+      expect(prod?.brand).toBe('Royal Enfield');
       expect(prod?.imageUrls?.length).toBe(2);
-      expect(prod?.unit).toBe('5kg bag');
+      expect(prod?.unit).toBe('vehicle');
       done();
     });
   });

@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
+  Car,
   Compass,
   Filter,
   MapPin,
   Plus,
   Search,
-  ShoppingBag,
   Sparkles,
   Store,
 } from 'lucide-angular';
@@ -74,7 +74,7 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
           [class.is-active]="activeTab() === 'products'"
           (click)="setActiveTab('products')"
         >
-          <lucide-icon [img]="ShoppingBagIcon" [size]="14"></lucide-icon>
+          <lucide-icon [img]="CarIcon" [size]="14"></lucide-icon>
           <span>{{ t('search_products') }} ({{ products().length }})</span>
         </button>
 
@@ -118,11 +118,11 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
                       <img [src]="product.primaryImageUrl || '/favicon.ico'" [alt]="product.name" class="bm-prod-img" />
                     </div>
                     <div class="bm-prod-meta">
-                      <span class="bm-prod-store">{{ product.storeName || 'Partner Store' }}</span>
+                      <span class="bm-prod-store">{{ product.storeName || 'Authorized Dealer' }}</span>
                       <h4 class="bm-prod-name">{{ product.name }}</h4>
                       <div class="bm-price-line">
-                        <span class="bm-price">₹{{ product.price }}</span>
-                        <span class="bm-unit">/ {{ product.unit }}</span>
+                        <span class="bm-price">₹{{ product.price | number }}</span>
+                        <span class="bm-unit">/ {{ product.unit || 'vehicle' }}</span>
                       </div>
                     </div>
                   </a>
@@ -134,8 +134,8 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
               }
             </div>
           } @else {
-            <div class="bm-empty-box">
-              <p>No products matching this category within {{ radius() }} km.</p>
+            <div class="bm-empty-tab">
+              <p>No vehicles found matching this category within {{ radius() }} km.</p>
             </div>
           }
         }
@@ -278,12 +278,15 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
     .bm-radius-change-link {
       color: var(--bm-color-primary);
       font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .bm-segment-tabs {
       display: flex;
       border-bottom: 1px solid var(--bm-color-border);
       gap: 8px;
+      overflow-x: auto;
     }
 
     .bm-segment-btn {
@@ -295,6 +298,8 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
       font-weight: 500;
       color: var(--bm-color-text-secondary);
       border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      flex-shrink: 0;
 
       &.is-active {
         color: var(--bm-color-primary);
@@ -551,7 +556,7 @@ export class ExplorePageComponent implements OnInit {
 
   readonly SearchIcon = Search;
   readonly MapPinIcon = MapPin;
-  readonly ShoppingBagIcon = ShoppingBag;
+  readonly CarIcon = Car;
   readonly SparklesIcon = Sparkles;
   readonly StoreIcon = Store;
   readonly PlusIcon = Plus;

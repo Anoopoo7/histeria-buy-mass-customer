@@ -32,7 +32,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
       <a [routerLink]="['/cart']" [queryParams]="{ tab: 'submitted' }" class="bm-pool-sub-banner">
         <div class="bm-pool-sub-left">
           <lucide-icon [img]="SparklesIcon" [size]="15" class="text-primary"></lucide-icon>
-          <span>Have a cart committed to a pool? View Pool-Submitted Carts</span>
+          <span>Have a vehicle committed to a pool? View Pool-Submitted Vehicles</span>
         </div>
         <lucide-icon [img]="ChevronRightIcon" [size]="14" class="text-muted"></lucide-icon>
       </a>
@@ -99,11 +99,11 @@ import { TranslationService } from '../../../../core/services/translation.servic
               <div class="bm-order-body">
                 <div class="bm-store-line">
                   <lucide-icon [img]="StoreIcon" [size]="14" class="text-primary"></lucide-icon>
-                  <span class="bm-store-name">{{ order.storeName || 'Partner Store' }}</span>
+                  <span class="bm-store-name">{{ order.storeName || 'Authorized Dealership' }}</span>
                 </div>
 
                 <div class="bm-items-summary">
-                  <span class="bm-items-count">{{ order.items.length }} {{ order.items.length === 1 ? 'item' : 'items' }}</span>
+                  <span class="bm-items-count">{{ order.items.length }} {{ order.items.length === 1 ? 'vehicle' : 'vehicles' }}</span>
                   @if (order.items.length > 0) {
                     <span class="bm-items-preview">
                       ({{ order.items[0].productName }}{{ order.items.length > 1 ? ' +' + (order.items.length - 1) + ' more' : '' }})
@@ -115,8 +115,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
               <!-- Card Footer: Total & CTA -->
               <div class="bm-card-bottom">
                 <div class="bm-amount-box">
-                  <span class="bm-amount-label">Final Amount</span>
-                  <span class="bm-amount-val">₹{{ order.finalAmount || order.regularTotal }}</span>
+                  <span class="bm-amount-label">Payable Amount</span>
+                  <span class="bm-amount-val">₹{{ (order.finalAmount || order.regularTotal) | number }}</span>
                 </div>
 
                 <div class="bm-cta-line">
@@ -131,8 +131,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
         <div class="bm-orders-empty">
           <lucide-icon [img]="PackageIcon" [size]="40" class="text-muted"></lucide-icon>
           <h3>{{ t('orders_empty') }}</h3>
-          <p>Join group buying pools and support local stores to unlock collective discounts.</p>
-          <a routerLink="/pools" class="bm-btn-discover">Discover Group Deals</a>
+          <p>Join vehicle group buying pools to unlock fleet discounts on cars and bikes.</p>
+          <a routerLink="/pools" class="bm-btn-discover">Discover Vehicle Deals</a>
         </div>
       }
     </div>

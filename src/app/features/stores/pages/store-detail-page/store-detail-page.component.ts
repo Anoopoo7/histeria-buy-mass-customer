@@ -147,7 +147,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
             (click)="setActiveStoreTab('photos')"
           >
             <lucide-icon [img]="ImageIcon" [size]="15"></lucide-icon>
-            <span>Store Photos ({{ storeImages().length }})</span>
+            <span>Showroom Photos ({{ storeImages().length }})</span>
           </button>
         </div>
 
@@ -197,7 +197,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
               <div class="bm-endpoint-row">
                 <div class="bm-endpoint-dot is-destination"></div>
                 <div class="bm-endpoint-meta">
-                  <span class="bm-endpoint-label">Destination Store</span>
+                  <span class="bm-endpoint-label">Destination Showroom</span>
                   <span class="bm-endpoint-val">
                     {{ store()?.storeName }} ({{ store()?.addressLine1 ? store()?.addressLine1 + ', ' : '' }}{{ store()?.city }})
                   </span>
@@ -273,17 +273,17 @@ import { TranslationService } from '../../../../core/services/translation.servic
         <section class="bm-store-pools-section">
           <div class="bm-sec-header">
             <lucide-icon [img]="SparklesIcon" [size]="16" class="text-primary"></lucide-icon>
-            <h2 class="bm-sec-title">Store Group-Buying Campaigns</h2>
+            <h2 class="bm-sec-title">Showroom Group-Buying Campaigns</h2>
           </div>
 
           <div class="bm-pools-slider hide-scroll">
             @for (pool of pools(); track pool.id) {
               <a [routerLink]="['/pools', pool.id]" class="bm-pool-mini-card">
                 <div class="bm-pool-mini-head">
-                  <span class="bm-badge-discount">Up to {{ pool.maxDiscountPercentage }}% OFF</span>
+                  <span class="bm-badge-discount">Up to {{ pool.maxDiscountPercentage || 15 }}% OFF</span>
                 </div>
                 <h3 class="bm-pool-mini-title">{{ pool.title }}</h3>
-                <span class="bm-pool-mini-cta">Join Group Deal →</span>
+                <span class="bm-pool-mini-cta">Join Vehicle Deal →</span>
               </a>
             }
           </div>
@@ -292,7 +292,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
 
       <!-- Store Products Catalog -->
       <section class="bm-store-products-section">
-        <h2 class="bm-sec-title">Products Available at this Store</h2>
+        <h2 class="bm-sec-title">Vehicles Available at this Showroom</h2>
 
         @if (isLoadingProducts()) {
           <div class="bm-products-grid">
@@ -311,8 +311,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
                   <div class="bm-prod-info">
                     <h4 class="bm-prod-title">{{ prod.name }}</h4>
                     <div class="bm-price-box">
-                      <span class="bm-price">₹{{ prod.price }}</span>
-                      <span class="bm-unit">/ {{ prod.unit }}</span>
+                      <span class="bm-price">₹{{ prod.price | number }}</span>
+                      <span class="bm-unit">/ {{ prod.unit || 'vehicle' }}</span>
                     </div>
                   </div>
                 </a>
@@ -325,7 +325,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
           </div>
         } @else {
           <div class="bm-empty-catalog">
-            <p>No products currently listed for this store.</p>
+            <p>No vehicles currently listed for this showroom.</p>
           </div>
         }
       </section>

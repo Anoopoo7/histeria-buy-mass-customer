@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Plus, Search, ShoppingBag } from 'lucide-angular';
+import { Car, Plus, Search } from 'lucide-angular';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProductRecord } from '../../../../core/models/product.model';
 import { CartService } from '../../../../core/services/cart.service';
@@ -18,7 +18,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
       <!-- Header -->
       <div class="bm-page-head">
         <h1 class="bm-title">{{ t('sec_popular_products') }}</h1>
-        <span class="bm-count">{{ products().length }} items found</span>
+        <span class="bm-count">{{ products().length }} vehicles found</span>
       </div>
 
       <!-- Products 2-Column Grid -->
@@ -42,14 +42,14 @@ import { TranslationService } from '../../../../core/services/translation.servic
                   />
                 </div>
                 <div class="bm-card-meta">
-                  <span class="bm-card-store">{{ product.storeName || 'Partner Store' }}</span>
+                  <span class="bm-card-store">{{ product.storeName || 'Authorized Dealership' }}</span>
                   <h3 class="bm-card-name">{{ product.name }}</h3>
                   <div class="bm-card-price-row">
-                    <span class="bm-price">₹{{ product.price }}</span>
+                    <span class="bm-price">₹{{ product.price | number }}</span>
                     @if (product.originalPrice && product.originalPrice > product.price) {
-                      <span class="bm-orig">₹{{ product.originalPrice }}</span>
+                      <span class="bm-orig">₹{{ product.originalPrice | number }}</span>
                     }
-                    <span class="bm-unit">/ {{ product.unit }}</span>
+                    <span class="bm-unit">/ {{ product.unit || 'vehicle' }}</span>
                   </div>
                 </div>
               </a>
@@ -67,7 +67,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
         </div>
       } @else {
         <div class="bm-empty-catalog">
-          <p>No products available matching your criteria.</p>
+          <p>No vehicles available matching your criteria.</p>
         </div>
       }
     </div>

@@ -133,14 +133,14 @@ import { TranslationService } from '../../../../core/services/translation.servic
                       <a [routerLink]="['/products', prod.id]" class="bm-prod-link">
                         <img [src]="prod.primaryImageUrl || '/favicon.ico'" [alt]="prod.name" class="bm-prod-img" />
                         <div class="bm-prod-meta">
-                          <span class="bm-store-name">{{ prod.storeName }}</span>
+                          <span class="bm-store-name">{{ prod.storeName || 'Authorized Dealership' }}</span>
                           <span class="bm-prod-title">{{ prod.name }}</span>
-                          <span class="bm-prod-price">₹{{ prod.price }}</span>
+                          <span class="bm-prod-price">₹{{ prod.price | number }}</span>
                         </div>
                       </a>
                       <button type="button" class="bm-cart-mini-btn" (click)="addToCart(prod.id)">
                         <lucide-icon [img]="PlusIcon" [size]="14"></lucide-icon>
-                        <span>Add</span>
+                        <span>Book</span>
                       </button>
                     </div>
                   }
@@ -162,7 +162,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
                       </div>
                       <div class="bm-store-meta">
                         <span class="bm-store-title">{{ store.storeName }}</span>
-                        <span class="bm-store-sub">{{ store.businessType }} • {{ store.city }}</span>
+                        <span class="bm-store-sub">{{ store.businessType || 'Dealership' }} • {{ store.city }}</span>
                       </div>
                     </a>
                   }
@@ -182,8 +182,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
                       <img [src]="pool.primaryImageUrl || '/favicon.ico'" [alt]="pool.title" class="bm-pool-img" />
                       <div class="bm-pool-meta">
                         <span class="bm-pool-title">{{ pool.title }}</span>
-                        <span class="bm-pool-sub">{{ pool.storeName }}</span>
-                        <span class="bm-pool-discount">Up to {{ pool.maxDiscountPercentage }}% off</span>
+                        <span class="bm-pool-sub">{{ pool.storeName || 'Dealership' }}</span>
+                        <span class="bm-pool-discount">Up to {{ pool.maxDiscountPercentage || 15 }}% off</span>
                       </div>
                     </a>
                   }
@@ -197,7 +197,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
             <div class="bm-no-results">
               <lucide-icon [img]="SearchIcon" [size]="32" class="text-muted"></lucide-icon>
               <h4>{{ t('search_no_results') }} "{{ searchQuery }}"</h4>
-              <p>Try searching for general grocery terms like "rice", "oil", "tea" or store names.</p>
+              <p>Try searching for vehicle models like "Punch", "Swift", "Classic 350", "Activa" or showroom names.</p>
             </div>
           }
         </div>
@@ -659,9 +659,9 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private getRecentSearches(): string[] {
     try {
       const s = localStorage.getItem('bm_recent_searches');
-      return s ? JSON.parse(s) : ['Rice', 'Coconut Oil', 'Tea', 'Bakery'];
+      return s ? JSON.parse(s) : ['Punch', 'Swift', 'Classic 350', 'Activa 6G', 'Ather 450X', 'Creta'];
     } catch {
-      return ['Rice', 'Coconut Oil', 'Tea'];
+      return ['Punch', 'Swift', 'Classic 350', 'Activa 6G'];
     }
   }
 }

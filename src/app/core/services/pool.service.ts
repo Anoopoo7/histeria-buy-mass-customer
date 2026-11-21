@@ -86,12 +86,17 @@ export class PoolService {
         ? Math.max(...tiers.map((t) => t.discountPercentage))
         : pool.maxDiscountPercentage || currentDiscount || 10;
 
+    const effectiveEndsAt =
+      prog.timeRemainingSeconds && prog.timeRemainingSeconds > 0 && !prog.hasEnded
+        ? new Date(Date.now() + prog.timeRemainingSeconds * 1000).toISOString()
+        : normalizeDateToIso(prog.endsAt || pool.endsAt);
+
     return {
       ...pool,
       title: liveStatus.title || pool.title,
       status: liveStatus.status || pool.status,
       startsAt: normalizeDateToIso(prog.startsAt || pool.startsAt),
-      endsAt: normalizeDateToIso(prog.endsAt || pool.endsAt),
+      endsAt: effectiveEndsAt,
       currentTotalAmount,
       currentParticipantCount,
       targetAmount,

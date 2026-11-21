@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Compass, Home, LucideAngularModule, ShoppingBag, Sparkles, User } from 'lucide-angular';
+import { Car, Compass, Home, LucideAngularModule, Sparkles, User } from 'lucide-angular';
 import { CartService } from '../../core/services/cart.service';
 import { TranslationService } from '../../core/services/translation.service';
 
@@ -59,7 +59,7 @@ import { TranslationService } from '../../core/services/translation.service';
           aria-label="Cart"
         >
           <div class="bm-nav-icon-wrap">
-            <lucide-icon [img]="ShoppingBagIcon" [size]="20"></lucide-icon>
+            <lucide-icon [img]="CarIcon" [size]="20"></lucide-icon>
             @if (cartCount() > 0) {
               <span class="bm-cart-badge">{{ cartCount() > 99 ? '99+' : cartCount() }}</span>
             }
@@ -150,6 +150,11 @@ import { TranslationService } from '../../core/services/translation.service';
       margin-top: 2px;
       letter-spacing: -0.2px;
       line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      text-align: center;
     }
 
     .bm-cart-badge {
@@ -179,7 +184,7 @@ export class BottomNavComponent {
   readonly HomeIcon = Home;
   readonly CompassIcon = Compass;
   readonly SparklesIcon = Sparkles;
-  readonly ShoppingBagIcon = ShoppingBag;
+  readonly CarIcon = Car;
   readonly UserIcon = User;
 
   readonly cartCount = this.cartService.totalItemCount;

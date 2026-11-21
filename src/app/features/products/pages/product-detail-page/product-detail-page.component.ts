@@ -12,7 +12,7 @@ import {
   Plus,
   Share2,
   ShieldCheck,
-  ShoppingBag,
+  Car,
   Sparkles,
   Store,
   X,
@@ -163,18 +163,18 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
                 Save ₹{{ prod.originalPrice - prod.price | number }}
               </span>
             }
-            <span class="bm-unit-badge">Per {{ prod.unit }}</span>
+            <span class="bm-unit-badge">Per {{ (prod.unit === 'g' || !prod.unit) ? 'Vehicle' : prod.unit }}</span>
           </div>
 
           <!-- Stock & Guarantee Status -->
           <div class="bm-guarantee-row">
             <div class="bm-status-pill is-in-stock">
               <lucide-icon [img]="CheckIcon" [size]="12"></lucide-icon>
-              <span>Available for Store Pickup</span>
+              <span>Showroom Delivery & PDI</span>
             </div>
             <div class="bm-status-pill is-verified">
               <lucide-icon [img]="ShieldCheckIcon" [size]="12"></lucide-icon>
-              <span>Verified Merchant</span>
+              <span>Authorized Dealership</span>
             </div>
           </div>
 
@@ -184,13 +184,13 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
               <div class="bm-pool-deal-header">
                 <div class="bm-deal-badge-wrap">
                   <lucide-icon [img]="SparklesIcon" [size]="15"></lucide-icon>
-                  <span class="bm-deal-badge-title">Active Group Deal Available</span>
+                  <span class="bm-deal-badge-title">Active Vehicle Group Deal</span>
                 </div>
                 <bm-countdown-timer [endsAt]="pool.endsAt"></bm-countdown-timer>
               </div>
 
               <p class="bm-pool-deal-desc">
-                Commit this product to <strong>{{ pool.title }}</strong> to unlock up to
+                Commit this vehicle to <strong>{{ pool.title }}</strong> to unlock up to
                 <strong>{{ pool.maxDiscountPercentage }}% collective volume discount</strong>!
               </p>
 
@@ -217,45 +217,45 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
               <lucide-icon [img]="MapPinIcon" [size]="16"></lucide-icon>
             </div>
             <div class="bm-notice-meta">
-              <span class="bm-notice-title">Collect in Person at Store</span>
+              <span class="bm-notice-title">Showroom Delivery & Handover</span>
               <span class="bm-notice-sub">
-                Pickup OTP sent to WhatsApp when order is packed. Free collection directly from {{ prod.store?.storeName || prod.storeName || 'the store' }}@if (prod.store?.city || prod.storeCity) { ({{ prod.store?.city || prod.storeCity }})}.
+                Handover OTP sent to WhatsApp upon deal completion. Pre-delivery inspection (PDI), registration support, and key handover directly from {{ prod.store?.storeName || prod.storeName || 'the showroom' }}@if (prod.store?.city || prod.storeCity) { ({{ prod.store?.city || prod.storeCity }})}.
               </span>
             </div>
           </div>
 
           <!-- Product Specifications & Details -->
           <div class="bm-specs-container">
-            <h3 class="bm-section-title">Product Details & Specifications</h3>
+            <h3 class="bm-section-title">Vehicle Details & Specifications</h3>
             <p class="bm-desc-text">
-              {{ prod.description || 'Quality product sourced directly by local Kerala merchant. Inspected and packaged fresh.' }}
+              {{ prod.description || 'Verified vehicle sourced directly through authorized dealership network. Inspected with manufacturer warranty.' }}
             </p>
 
             <div class="bm-specs-table">
               @if (prod.brand) {
                 <div class="bm-spec-row">
-                  <span class="bm-spec-label">Brand</span>
+                  <span class="bm-spec-label">Brand / Manufacturer</span>
                   <span class="bm-spec-val">{{ prod.brand }}</span>
                 </div>
               }
               <div class="bm-spec-row">
-                <span class="bm-spec-label">Category</span>
+                <span class="bm-spec-label">Vehicle Category</span>
                 <span class="bm-spec-val">{{ prod.category }}</span>
               </div>
               <div class="bm-spec-row">
-                <span class="bm-spec-label">Unit / Packaging</span>
-                <span class="bm-spec-val">{{ prod.unit }}</span>
+                <span class="bm-spec-label">Booking Unit</span>
+                <span class="bm-spec-val">{{ (prod.unit === 'g' || !prod.unit) ? 'Vehicle / Unit' : prod.unit }}</span>
               </div>
               @if (prod.sku) {
                 <div class="bm-spec-row">
-                  <span class="bm-spec-label">Item SKU</span>
+                  <span class="bm-spec-label">Variant / Model SKU</span>
                   <span class="bm-spec-val">{{ prod.sku }}</span>
                 </div>
               }
               <div class="bm-spec-row">
                 <span class="bm-spec-label">Fulfilled by</span>
                 <a [routerLink]="['/stores', prod.storeId]" class="bm-spec-store-link">
-                  {{ prod.store?.storeName || prod.storeName || 'Partner Merchant' }}
+                  {{ prod.store?.storeName || prod.storeName || 'Authorized Dealership' }}
                   @if (prod.store?.city || prod.storeCity) {
                     <span>({{ prod.store?.city || prod.storeCity }})</span>
                   }
@@ -269,7 +269,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
         @if (relatedProducts().length > 0) {
           <section class="bm-related-section">
             <div class="bm-sec-header">
-              <h3 class="bm-sec-title">More from {{ prod.store?.storeName || prod.storeName || 'this Store' }}</h3>
+              <h3 class="bm-sec-title">More Vehicles from {{ prod.store?.storeName || prod.storeName || 'this Showroom' }}</h3>
               <a [routerLink]="['/stores', prod.storeId]" class="bm-sec-link">
                 View All
                 <lucide-icon [img]="ChevronRightIcon" [size]="13"></lucide-icon>
@@ -295,7 +295,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
                     aria-label="Add to cart"
                   >
                     <lucide-icon [img]="PlusIcon" [size]="14"></lucide-icon>
-                    <span>Add</span>
+                    <span>Book</span>
                   </button>
                 </div>
               }
@@ -334,9 +334,9 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
             [disabled]="isAdding()"
             (click)="addToCart(prod.id)"
           >
-            <lucide-icon [img]="ShoppingBagIcon" [size]="18"></lucide-icon>
+            <lucide-icon [img]="CarIcon" [size]="18"></lucide-icon>
             <span>
-              {{ isAdding() ? 'Adding...' : 'Add to Cart • ₹' + ((prod.price * quantity()) | number) }}
+              {{ isAdding() ? 'Booking...' : 'Book Vehicle • ₹' + ((prod.price * quantity()) | number) }}
             </span>
           </button>
         </div>
@@ -1077,7 +1077,7 @@ export class ProductDetailPageComponent implements OnInit {
   readonly SparklesIcon = Sparkles;
   readonly PlusIcon = Plus;
   readonly MinusIcon = Minus;
-  readonly ShoppingBagIcon = ShoppingBag;
+  readonly CarIcon = Car;
   readonly HeartIcon = Heart;
   readonly Share2Icon = Share2;
   readonly CheckIcon = Check;
@@ -1171,7 +1171,7 @@ export class ProductDetailPageComponent implements OnInit {
     this.cartService.addItem(productId, this.quantity()).subscribe({
       next: () => {
         this.isAdding.set(false);
-        this.toast.success(`Added ${this.quantity()} item(s) to store cart`);
+        this.toast.success(`Added ${this.quantity()} vehicle(s) to booking list`);
       },
       error: () => {
         this.isAdding.set(false);
@@ -1182,7 +1182,7 @@ export class ProductDetailPageComponent implements OnInit {
   addRelatedToCart(productId: string): void {
     this.cartService.addItem(productId, 1).subscribe({
       next: () => {
-        this.toast.success('Added to cart');
+        this.toast.success('Vehicle added to booking list');
       },
     });
   }

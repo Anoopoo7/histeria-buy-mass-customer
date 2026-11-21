@@ -46,7 +46,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
             </div>
             <div class="bm-store-location">
               <lucide-icon [img]="MapPinIcon" [size]="14" class="text-muted"></lucide-icon>
-              <span>Store Pickup Point • Kerala</span>
+              <span>Authorized Dealership Showroom • Kerala</span>
             </div>
           </div>
 
@@ -58,13 +58,13 @@ import { TranslationService } from '../../../../core/services/translation.servic
             </div>
             <p class="bm-fulfilment-desc">{{ t('checkout_pickup_desc') }}</p>
             <div class="bm-otp-notice">
-              <span>A secure 6-digit pickup verification code will be dispatched to your registered WhatsApp when the merchant confirms your order.</span>
+              <span>A secure 6-digit handover OTP will be dispatched to your registered WhatsApp when the dealership confirms your vehicle booking.</span>
             </div>
           </div>
 
           <!-- Items Snapshot -->
           <div class="bm-card bm-items-box">
-            <h3 class="bm-card-heading">Store Order Items ({{ c.itemCount }})</h3>
+            <h3 class="bm-card-heading">Vehicle Booking Items ({{ c.itemCount }})</h3>
             <div class="bm-items-list">
               @for (item of c.items; track item.productId) {
                 <div class="bm-checkout-item">
@@ -72,7 +72,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
                     <span class="bm-item-qty">{{ item.quantity }}x</span>
                     <span class="bm-item-title">{{ item.name }}</span>
                   </div>
-                  <span class="bm-item-amount">₹{{ (item.currentPrice || item.priceAtAddition) * item.quantity }}</span>
+                  <span class="bm-item-amount">₹{{ ((item.currentPrice || item.priceAtAddition) * item.quantity) | number }}</span>
                 </div>
               }
             </div>
@@ -83,10 +83,10 @@ import { TranslationService } from '../../../../core/services/translation.servic
             <div class="bm-card bm-pool-opp-card">
               <div class="bm-opp-head">
                 <lucide-icon [img]="SparklesIcon" [size]="18" class="text-primary"></lucide-icon>
-                <span class="bm-opp-title">Pool Discount Eligible</span>
+                <span class="bm-opp-title">Vehicle Pool Discount Eligible</span>
               </div>
               <p class="bm-opp-desc">
-                Commit this cart to <strong>{{ pool.title }}</strong> to earn up to {{ pool.maxDiscountPercentage }}% off wholesale price!
+                Commit this vehicle to <strong>{{ pool.title }}</strong> to earn up to {{ pool.maxDiscountPercentage }}% off showroom price!
               </p>
             </div>
           }
@@ -97,12 +97,12 @@ import { TranslationService } from '../../../../core/services/translation.servic
 
             <div class="bm-summary-row">
               <span class="bm-summary-label">{{ t('checkout_item_total') }}</span>
-              <span class="bm-summary-val">₹{{ c.cartTotal }}</span>
+              <span class="bm-summary-val">₹{{ c.cartTotal | number }}</span>
             </div>
 
             <div class="bm-summary-row">
-              <span class="bm-summary-label">Store Pickup Handling</span>
-              <span class="bm-summary-val text-success">FREE</span>
+              <span class="bm-summary-label">Showroom Handover & PDI</span>
+              <span class="bm-summary-val text-success">INCLUDED</span>
             </div>
 
             @if (activeStorePool()) {
@@ -116,7 +116,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
 
             <div class="bm-summary-row is-total">
               <span class="bm-total-label">{{ t('checkout_final_estimate') }}</span>
-              <span class="bm-total-val">₹{{ c.cartTotal }}</span>
+              <span class="bm-total-val">₹{{ c.cartTotal | number }}</span>
             </div>
           </div>
         </div>
@@ -124,8 +124,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
         <!-- Sticky Confirmation Bar -->
         <div class="bm-sticky-confirm-bar">
           <div class="bm-confirm-total-box">
-            <span class="bm-total-sub">Total Payable at Pickup</span>
-            <span class="bm-total-amount">₹{{ c.cartTotal }}</span>
+            <span class="bm-total-sub">Total Payable at Showroom</span>
+            <span class="bm-total-amount">₹{{ c.cartTotal | number }}</span>
           </div>
 
           <button

@@ -85,7 +85,7 @@ import { RadiusSelectorComponent } from '../../../../shared/ui/radius-selector/r
           <div class="bm-gps-info">
             <h3 class="bm-gps-title">{{ t('loc_use_current') }}</h3>
             <p class="bm-gps-desc">
-              Uses your device's GPS to find the closest Kerala grocery, bakery and retail merchants within {{ radius() }} km.
+              Uses your device's GPS to find the closest authorized car & bike dealerships and vehicle showrooms within {{ radius() }} km.
             </p>
           </div>
 

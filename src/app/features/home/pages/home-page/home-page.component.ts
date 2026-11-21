@@ -3,13 +3,13 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
   ArrowRight,
+  Car,
   ChevronRight,
   Clock,
   Compass,
   MapPin,
   Plus,
   Search,
-  ShoppingBag,
   Sparkles,
   Store,
   Tag,
@@ -36,14 +36,14 @@ export interface CategoryCard {
 }
 
 export const HOME_CATEGORIES: CategoryCard[] = [
-  { id: 'groceries', name: 'Groceries', nameMl: 'പലചരക്ക്', icon: '🌾' },
-  { id: 'spices', name: 'Spices & Condiments', nameMl: 'മസാലകൾ', icon: '🌶️' },
-  { id: 'bakery', name: 'Bakery & Sweets', nameMl: 'ബേക്കറി പലഹാരങ്ങൾ', icon: '🥐' },
-  { id: 'fresh', name: 'Fresh Fruits & Veg', nameMl: 'പച്ചക്കറികൾ', icon: '🥑' },
-  { id: 'oil-staples', name: 'Cooking Oils', nameMl: 'വെളിച്ചെണ്ണ & എണ്ണകൾ', icon: '🥥' },
-  { id: 'tea-coffee', name: 'Tea & Coffee', nameMl: 'ചായ & കാപ്പി', icon: '☕' },
-  { id: 'dairy', name: 'Dairy Products', nameMl: 'പാൽ ഉൽപ്പന്നങ്ങൾ', icon: '🥛' },
-  { id: 'household', name: 'Household Essentials', nameMl: 'വീട്ടുപകരണങ്ങൾ', icon: '🧹' },
+  { id: 'cars', name: 'Cars & SUVs', nameMl: 'കാറുകൾ & എസ്‌യുവി', icon: '🚗' },
+  { id: 'bikes', name: 'Bikes & Moto', nameMl: 'ബൈക്കുകൾ', icon: '🏍️' },
+  { id: 'scooters', name: 'Scooters', nameMl: 'സ്കൂട്ടറുകൾ', icon: '🛵' },
+  { id: 'ev', name: 'Electric (EV)', nameMl: 'ഇലക്ട്രിക് (EV)', icon: '⚡' },
+  { id: 'sedans', name: 'Luxury Cars', nameMl: 'ലക്ഷ്വറി & സെഡാൻ', icon: '🏎️' },
+  { id: 'commercial', name: 'Commercial', nameMl: 'വാണിജ്യ വാഹനം', icon: '🛞' },
+  { id: 'riding-gear', name: 'Riding Gear', nameMl: 'റൈഡിംഗ് ഗിയർ', icon: '🪖' },
+  { id: 'spares', name: 'Accessories', nameMl: 'ആക്‌സസറികൾ', icon: '🔧' },
 ];
 
 @Component({
@@ -106,7 +106,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
 
                 <div class="bm-pool-body">
                   <div class="bm-pool-store-row">
-                    <span class="bm-pool-store-name">{{ pool.storeName || 'Kerala Partner Store' }}</span>
+                    <span class="bm-pool-store-name">{{ pool.storeName || 'Authorized Dealership' }}</span>
                     @if (pool.distanceKm !== undefined) {
                       <span class="bm-pool-distance">{{ pool.distanceKm }} km</span>
                     }
@@ -134,7 +134,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
           </div>
         } @else {
           <div class="bm-empty-banner">
-            <p>No active group deals found within {{ radius() }} km right now.</p>
+            <p>No active vehicle group deals found within {{ radius() }} km right now.</p>
             <a routerLink="/location" class="bm-inline-link">Change discovery radius</a>
           </div>
         }
@@ -197,7 +197,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
                       <span class="bm-store-dist">{{ store.distanceKm }} km</span>
                     }
                   </div>
-                  <span class="bm-store-cat">{{ store.businessType }} • {{ store.city }}</span>
+                  <span class="bm-store-cat">{{ store.businessType || 'Dealership' }} • {{ store.city }}</span>
                   @if (store.description) {
                     <p class="bm-store-desc">{{ store.description }}</p>
                   }
@@ -208,7 +208,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
           </div>
         } @else {
           <div class="bm-empty-banner">
-            <p>No partner stores found within {{ radius() }} km.</p>
+            <p>No authorized dealerships found within {{ radius() }} km.</p>
             <a routerLink="/location" class="bm-inline-link">Adjust radius or location</a>
           </div>
         }
@@ -219,7 +219,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
         <div class="bm-section-head">
           <div class="bm-head-title-group">
             <h2 class="bm-section-title">
-              <lucide-icon [img]="ShoppingBagIcon" [size]="18" class="text-primary"></lucide-icon>
+              <lucide-icon [img]="CarIcon" [size]="18" class="text-primary"></lucide-icon>
               <span>{{ t('sec_popular_products') }}</span>
             </h2>
           </div>
@@ -249,14 +249,14 @@ export const HOME_CATEGORIES: CategoryCard[] = [
                     />
                   </div>
                   <div class="bm-product-meta">
-                    <span class="bm-product-store">{{ product.storeName || 'Partner Store' }}</span>
+                    <span class="bm-product-store">{{ product.storeName || 'Authorized Dealer' }}</span>
                     <h4 class="bm-product-title">{{ product.name }}</h4>
                     <div class="bm-price-row">
-                      <span class="bm-product-price">₹{{ product.price }}</span>
+                      <span class="bm-product-price">₹{{ product.price | number }}</span>
                       @if (product.originalPrice && product.originalPrice > product.price) {
-                        <span class="bm-product-orig">₹{{ product.originalPrice }}</span>
+                        <span class="bm-product-orig">₹{{ product.originalPrice | number }}</span>
                       }
-                      <span class="bm-product-unit">/ {{ product.unit }}</span>
+                      <span class="bm-product-unit">/ {{ product.unit || 'vehicle' }}</span>
                     </div>
                   </div>
                 </a>
@@ -342,14 +342,17 @@ export const HOME_CATEGORIES: CategoryCard[] = [
 
     .bm-section-head {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       justify-content: space-between;
+      gap: 12px;
     }
 
     .bm-head-title-group {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
+      flex: 1;
+      min-width: 0;
     }
 
     .bm-section-title {
@@ -360,20 +363,30 @@ export const HOME_CATEGORIES: CategoryCard[] = [
       align-items: center;
       gap: 6px;
       letter-spacing: -0.3px;
+      line-height: 1.25;
     }
 
     .bm-section-subtitle {
       font-size: 12px;
+      line-height: 1.35;
       color: var(--bm-color-text-secondary);
     }
 
     .bm-section-link {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
       font-size: 13px;
       font-weight: 600;
       color: var(--bm-color-primary);
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-top: 2px;
+      text-decoration: none;
+
+      lucide-icon {
+        flex-shrink: 0;
+      }
     }
 
     // Horizontal Carousel for Pools
@@ -382,13 +395,13 @@ export const HOME_CATEGORIES: CategoryCard[] = [
       gap: 12px;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      padding-bottom: 4px;
       margin: 0 -14px;
       padding: 0 14px 6px;
+      -webkit-overflow-scrolling: touch;
     }
 
     .bm-pool-card {
-      flex: 0 0 280px;
+      flex: 0 0 295px;
       scroll-snap-align: start;
       background-color: var(--bm-color-surface);
       border: 1px solid var(--bm-color-border);
@@ -481,7 +494,9 @@ export const HOME_CATEGORIES: CategoryCard[] = [
       display: flex;
       gap: 12px;
       overflow-x: auto;
-      padding-bottom: 2px;
+      margin: 0 -14px;
+      padding: 0 14px 6px;
+      -webkit-overflow-scrolling: touch;
     }
 
     .bm-cat-item {
@@ -489,8 +504,10 @@ export const HOME_CATEGORIES: CategoryCard[] = [
       flex-direction: column;
       align-items: center;
       gap: 6px;
-      flex: 0 0 72px;
+      flex: 0 0 74px;
+      width: 74px;
       text-align: center;
+      text-decoration: none;
     }
 
     .bm-cat-bubble {
@@ -512,8 +529,14 @@ export const HOME_CATEGORIES: CategoryCard[] = [
     .bm-cat-name {
       font-size: 11px;
       color: var(--bm-color-text-secondary);
-      line-height: 1.2;
+      line-height: 1.25;
       font-weight: 500;
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-width: 74px;
     }
 
     // Stores List
@@ -608,6 +631,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
 
     .bm-store-chevron {
       color: var(--bm-color-text-muted);
+      flex-shrink: 0;
     }
 
     // Products 2-column Grid
@@ -804,7 +828,7 @@ export class HomePageComponent implements OnInit {
 
   readonly SparklesIcon = Sparkles;
   readonly StoreIcon = Store;
-  readonly ShoppingBagIcon = ShoppingBag;
+  readonly CarIcon = Car;
   readonly SearchIcon = Search;
   readonly ChevronRightIcon = ChevronRight;
   readonly ArrowRightIcon = ArrowRight;

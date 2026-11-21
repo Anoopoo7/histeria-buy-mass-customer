@@ -3,6 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   ArrowRight,
+  Car,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -11,7 +12,6 @@ import {
   Info,
   Minus,
   Plus,
-  ShoppingBag,
   Sparkles,
   Store,
   Trash2,
@@ -41,8 +41,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
           (click)="setTab('active')"
         >
           <div class="bm-tab-content">
-            <lucide-icon [img]="ShoppingBagIcon" [size]="15"></lucide-icon>
-            <span>Active Carts</span>
+            <lucide-icon [img]="CarIcon" [size]="15"></lucide-icon>
+            <span>Active Bookings</span>
             @if (carts().length > 0) {
               <span class="bm-tab-badge">{{ carts().length }}</span>
             }
@@ -185,7 +185,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
           <!-- Empty Cart -->
           <div class="bm-cart-empty">
             <div class="bm-empty-icon-wrap">
-              <lucide-icon [img]="ShoppingBagIcon" [size]="36" class="text-muted"></lucide-icon>
+              <lucide-icon [img]="CarIcon" [size]="36" class="text-muted"></lucide-icon>
             </div>
             <h3 class="bm-empty-title">{{ t('cart_empty_title') }}</h3>
             <p class="bm-empty-sub">{{ t('cart_empty_sub') }}</p>
@@ -202,9 +202,9 @@ import { TranslationService } from '../../../../core/services/translation.servic
         <div class="bm-submitted-info-box">
           <lucide-icon [img]="SparklesIcon" [size]="18" class="text-primary"></lucide-icon>
           <div class="bm-submitted-info-text">
-            <strong>Group Pool Submissions</strong>
+            <strong>Group Pool Vehicle Submissions</strong>
             <p>
-              These carts are committed to pool campaigns awaiting volume targets. Once the pool concludes, volume discounts are locked and store pickup orders are placed.
+              These vehicle bookings are committed to pool campaigns awaiting volume targets. Once the pool concludes, volume discounts are locked and dealership handover orders are placed.
             </p>
           </div>
         </div>
@@ -214,7 +214,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
           <div class="bm-store-filter-bar hide-scroll">
             <span class="bm-filter-label">
               <lucide-icon [img]="FilterIcon" [size]="13"></lucide-icon>
-              Filter Store:
+              Filter Dealership:
             </span>
             <button
               type="button"
@@ -222,7 +222,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
               [class.is-active]="!selectedStoreFilter()"
               (click)="onStoreFilterChange('')"
             >
-              All Stores
+              All Dealerships
             </button>
             @for (st of uniqueStores(); track st.id) {
               <button
@@ -362,23 +362,23 @@ import { TranslationService } from '../../../../core/services/translation.servic
           <!-- Empty Submitted Carts State -->
           <div class="bm-cart-empty">
             <div class="bm-empty-icon-wrap">
-              <lucide-icon [img]="SparklesIcon" [size]="34" class="text-primary"></lucide-icon>
+              <lucide-icon [img]="CarIcon" [size]="34" class="text-primary"></lucide-icon>
             </div>
-            <h3 class="bm-empty-title">No Submitted Pool Carts</h3>
+            <h3 class="bm-empty-title">No Submitted Pool Vehicles</h3>
             <p class="bm-empty-sub">
               @if (selectedStoreFilter()) {
-                No submitted pool carts found for this store.
+                No submitted pool vehicles found for this dealership.
               } @else {
-                Carts committed to group deal pools will appear here until the campaign concludes.
+                Vehicle bookings committed to group deal pools will appear here until the campaign concludes.
               }
             </p>
             @if (selectedStoreFilter()) {
               <button type="button" class="bm-btn-secondary" (click)="onStoreFilterChange('')">
-                Clear Store Filter
+                Clear Dealership Filter
               </button>
             } @else {
               <a routerLink="/pools" class="bm-btn-explore">
-                Explore Active Pools
+                Explore Active Vehicle Pools
               </a>
             }
           </div>
@@ -944,7 +944,7 @@ export class CartPageComponent implements OnInit {
   readonly MinusIcon = Minus;
   readonly SparklesIcon = Sparkles;
   readonly ArrowRightIcon = ArrowRight;
-  readonly ShoppingBagIcon = ShoppingBag;
+  readonly CarIcon = Car;
   readonly InfoIcon = Info;
   readonly ClockIcon = Clock;
   readonly FilterIcon = Filter;

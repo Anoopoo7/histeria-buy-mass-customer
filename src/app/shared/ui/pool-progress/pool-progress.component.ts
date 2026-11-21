@@ -74,11 +74,13 @@ import { PoolLiveProgress, PoolTier, PoolTierProgress } from '../../../core/mode
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       font-size: 12px;
     }
 
     .bm-joined-count {
       color: var(--bm-color-text-secondary);
+      white-space: nowrap;
 
       strong {
         color: var(--bm-color-text-primary);
@@ -93,6 +95,8 @@ import { PoolLiveProgress, PoolTier, PoolTierProgress } from '../../../core/mode
       padding: 1px 7px;
       border-radius: var(--bm-radius-sm);
       font-size: 11px;
+      white-space: nowrap;
+      flex-shrink: 0;
 
       &.is-unlocked {
         background-color: #dcfce7;
@@ -119,18 +123,25 @@ import { PoolLiveProgress, PoolTier, PoolTierProgress } from '../../../core/mode
     .bm-next-tier-row {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       font-size: 11px;
       color: var(--bm-color-text-secondary);
       background-color: var(--bm-color-surface-subtle);
-      padding: 3px 6px;
+      padding: 4px 8px;
       border-radius: var(--bm-radius-sm);
+      min-width: 0;
+
+      lucide-icon {
+        flex-shrink: 0;
+      }
     }
 
     .bm-next-tier-text {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      flex: 1;
+      min-width: 0;
     }
 
     .bm-tiers-steps {
@@ -147,6 +158,7 @@ import { PoolLiveProgress, PoolTier, PoolTierProgress } from '../../../core/mode
       font-size: 10px;
       color: var(--bm-color-text-muted);
       flex: 1;
+      text-align: center;
 
       &.is-reached {
         color: var(--bm-color-primary);
@@ -163,6 +175,13 @@ import { PoolLiveProgress, PoolTier, PoolTierProgress } from '../../../core/mode
       display: inline-flex;
       align-items: center;
       gap: 2px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .bm-tier-amt {
+      white-space: nowrap;
+      font-size: 9.5px;
     }
 
     .bm-check-icon {
