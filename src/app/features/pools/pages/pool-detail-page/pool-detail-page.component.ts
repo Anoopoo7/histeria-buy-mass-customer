@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   AlertCircle,
   ArrowLeft,
+  Car,
   CheckCircle2,
   Clock,
   HelpCircle,
   LucideAngularModule,
   Share2,
-  ShoppingBag,
   Sparkles,
   Store,
   Users,
@@ -112,6 +112,67 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
             </div>
           </div>
 
+          <!-- Eligible Cart Items Supporting This Pool -->
+          @if (!myParticipation() && matchingStoreCart(); as storeCart) {
+            @if (poolEligibleItems().length > 0) {
+              <div class="bm-card bm-eligible-cart-card">
+                <div class="bm-eligible-head">
+                  <div class="bm-eligible-title-group">
+                    <div class="bm-eligible-badge">
+                      <lucide-icon [img]="CarIcon" [size]="14"></lucide-icon>
+                      <span>In Your Cart</span>
+                    </div>
+                    <h3 class="bm-eligible-title">
+                      {{ poolEligibleItems().length }} vehicle{{ poolEligibleItems().length > 1 ? 's' : '' }} ready to join this deal
+                    </h3>
+                  </div>
+                  <span class="bm-eligible-total">₹{{ eligibleTotalValue() | number }}</span>
+                </div>
+
+                <p class="bm-eligible-desc">
+                  These vehicle(s) from <strong>{{ p.storeName || 'this dealership' }}</strong> are eligible for collective volume discounts under this campaign.
+                </p>
+
+                <!-- Item preview list with icons and details -->
+                <div class="bm-eligible-items-list">
+                  @for (item of poolEligibleItems(); track item.productId) {
+                    <div class="bm-eligible-item-row">
+                      <div class="bm-eligible-thumb-wrap">
+                        <img
+                          [src]="item.image || '/favicon.ico'"
+                          [alt]="item.name"
+                          class="bm-eligible-thumb"
+                        />
+                      </div>
+                      <div class="bm-eligible-info">
+                        <span class="bm-eligible-name">{{ item.name }}</span>
+                        <div class="bm-eligible-price-line">
+                          <span class="bm-eligible-qty">Qty: {{ item.quantity }}</span>
+                          <span class="bm-eligible-price">
+                            ₹{{ (item.itemSubtotal || item.currentPrice * item.quantity) | number }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Direct Join Button inside Card -->
+                <button
+                  type="button"
+                  class="bm-card-join-pool-btn"
+                  [disabled]="isParticipating()"
+                  (click)="participate(p.id, storeCart.id)"
+                >
+                  <lucide-icon [img]="SparklesIcon" [size]="16"></lucide-icon>
+                  <span>
+                    {{ isParticipating() ? 'Joining...' : 'Join Pool with this Cart • ₹' + (eligibleTotalValue() | number) }}
+                  </span>
+                </button>
+              </div>
+            }
+          }
+
           <!-- How BuyMass Works Explainer -->
           <div class="bm-card bm-explainer-card">
             <div class="bm-explainer-head">
@@ -130,7 +191,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
                 <lucide-icon [img]="CheckCircleIcon" [size]="20" class="text-success"></lucide-icon>
                 <div>
                   <h4 class="bm-joined-title">{{ t('pool_already_joined') }}</h4>
-                  <p class="bm-joined-val">Eligible Cart Value: ₹{{ part.eligibleCartValue }}</p>
+                  <p class="bm-joined-val">Eligible Cart Value: ₹{{ part.eligibleCartValue | number }}</p>
                 </div>
               </div>
 
@@ -152,13 +213,27 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
         <div class="bm-sticky-action-bar">
           @if (!myParticipation()) {
             @if (matchingStoreCart(); as storeCart) {
-              @if (storeCart.items.length > 0) {
-                <div class="bm-action-info">
-                  <span class="bm-store-cart-summary">
-                    Store Cart: {{ storeCart.itemCount }} items (₹{{ storeCart.cartTotal }})
-                  </span>
-                  <span class="bm-ready-hint">Ready to commit to this pool</span>
+              @if (poolEligibleItems().length > 0) {
+                <div class="bm-action-cart-summary">
+                  <!-- Stacked / row item icons -->
+                  <div class="bm-cart-item-icons-row">
+                    @for (item of poolEligibleItems().slice(0, 3); track item.productId) {
+                      <div class="bm-mini-item-icon-box">
+                        <img [src]="item.image || '/favicon.ico'" [alt]="item.name" class="bm-mini-item-thumb" />
+                      </div>
+                    }
+                    @if (poolEligibleItems().length > 3) {
+                      <div class="bm-mini-more-chip">+{{ poolEligibleItems().length - 3 }}</div>
+                    }
+                  </div>
+                  <div class="bm-action-text-col">
+                    <span class="bm-store-cart-summary">
+                      {{ poolEligibleItems().length }} vehicle{{ poolEligibleItems().length > 1 ? 's' : '' }} (₹{{ eligibleTotalValue() | number }})
+                    </span>
+                    <span class="bm-ready-hint">Eligible for collective discount</span>
+                  </div>
                 </div>
+
                 <button
                   type="button"
                   class="bm-btn-join"
@@ -170,18 +245,18 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
                 </button>
               } @else {
                 <div class="bm-action-info">
-                  <span class="bm-cart-empty-text">Your store cart is empty</span>
+                  <span class="bm-cart-empty-text">Your cart has no eligible items for this pool</span>
                 </div>
                 <a [routerLink]="['/stores', p.storeId]" class="bm-btn-browse">
-                  <span>Browse Store Products</span>
+                  <span>Browse Dealership</span>
                 </a>
               }
             } @else {
               <div class="bm-action-info">
-                <span class="bm-cart-empty-text">Add store products to join</span>
+                <span class="bm-cart-empty-text">Add vehicles from this dealership to join</span>
               </div>
               <a [routerLink]="['/stores', p.storeId]" class="bm-btn-browse">
-                <span>Browse Store Products</span>
+                <span>Browse Dealership</span>
               </a>
             }
           } @else {
@@ -395,6 +470,160 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
       line-height: 1.5;
     }
 
+    /* Eligible Cart Items Supporting Pool Card */
+    .bm-eligible-cart-card {
+      background: linear-gradient(135deg, rgba(23, 107, 80, 0.05) 0%, rgba(34, 197, 94, 0.08) 100%);
+      border: 1.5px solid var(--bm-color-primary-border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bm-eligible-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .bm-eligible-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bm-eligible-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--bm-color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .bm-eligible-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--bm-color-text-primary);
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .bm-eligible-total {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--bm-color-primary);
+      white-space: nowrap;
+    }
+
+    .bm-eligible-desc {
+      font-size: 12px;
+      color: var(--bm-color-text-secondary);
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .bm-eligible-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background-color: var(--bm-color-surface);
+      border: 1px solid var(--bm-color-border);
+      border-radius: var(--bm-radius-md);
+      padding: 8px 10px;
+    }
+
+    .bm-eligible-item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bm-eligible-thumb-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--bm-radius-md);
+      overflow: hidden;
+      background-color: var(--bm-color-surface-subtle);
+      border: 1px solid var(--bm-color-border-subtle);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bm-eligible-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .bm-eligible-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bm-eligible-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bm-color-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bm-eligible-price-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .bm-eligible-qty {
+      font-weight: 600;
+      color: var(--bm-color-text-secondary);
+      background-color: var(--bm-color-surface-subtle);
+      padding: 1px 6px;
+      border-radius: var(--bm-radius-sm);
+      font-size: 11px;
+    }
+
+    .bm-eligible-price {
+      font-weight: 700;
+      color: var(--bm-color-primary);
+    }
+
+    .bm-card-join-pool-btn {
+      height: 44px;
+      background-color: var(--bm-color-primary);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--bm-radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(23, 107, 80, 0.25);
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--bm-color-primary-hover);
+      }
+
+      &:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+    }
+
     .bm-joined-card {
       border-color: var(--bm-color-success-border);
       background-color: var(--bm-color-success-bg);
@@ -446,6 +675,65 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
       gap: 12px;
       z-index: 1000;
       box-shadow: var(--bm-shadow-sheet);
+    }
+
+    /* Sticky Action Bar Supporting Cart Items */
+    .bm-action-cart-summary {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .bm-cart-item-icons-row {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .bm-mini-item-icon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--bm-radius-sm);
+      overflow: hidden;
+      border: 1.5px solid var(--bm-color-surface);
+      background-color: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-left: -8px;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+
+    .bm-mini-item-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .bm-mini-more-chip {
+      width: 26px;
+      height: 26px;
+      border-radius: var(--bm-radius-full);
+      background-color: var(--bm-color-surface-subtle);
+      border: 1.5px solid var(--bm-color-surface);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--bm-color-text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -6px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    .bm-action-text-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
     }
 
     .bm-action-info {
@@ -554,10 +842,37 @@ export class PoolDetailPageComponent implements OnInit {
   readonly SparklesIcon = Sparkles;
   readonly HelpCircleIcon = HelpCircle;
   readonly CheckCircleIcon = CheckCircle2;
+  readonly CarIcon = Car;
 
   readonly pool = signal<PoolRecord | null>(null);
   readonly myParticipation = signal<PoolParticipationRecord | null>(null);
-  readonly matchingStoreCart = signal<FormattedCart | null>(null);
+
+  // Reactive matching store cart from CartService
+  readonly matchingStoreCart = computed(() => {
+    const p = this.pool();
+    if (!p) return null;
+    return this.cartService.getStoreCart(p.storeId) || null;
+  });
+
+  // Items from matching store cart that support this pool
+  readonly poolEligibleItems = computed(() => {
+    const p = this.pool();
+    const cart = this.matchingStoreCart();
+    if (!p || !cart || !cart.items || cart.items.length === 0) return [];
+
+    if (p.productIds && p.productIds.length > 0) {
+      return cart.items.filter((item) => p.productIds.includes(item.productId));
+    }
+    return cart.items;
+  });
+
+  // Total value of eligible items in the cart
+  readonly eligibleTotalValue = computed(() => {
+    return this.poolEligibleItems().reduce(
+      (sum, item) => sum + (item.itemSubtotal || (item.currentPrice || item.priceAtAddition) * item.quantity),
+      0,
+    );
+  });
 
   readonly isLoading = signal<boolean>(true);
   readonly isParticipating = signal<boolean>(false);
@@ -578,10 +893,6 @@ export class PoolDetailPageComponent implements OnInit {
       next: (p) => {
         if (p) {
           this.pool.set(p);
-
-          // Find store cart matching this pool's store
-          const storeCart = this.cartService.getStoreCart(p.storeId);
-          this.matchingStoreCart.set(storeCart || null);
 
           // If logged in, fetch participation
           if (this.auth.isAuthenticated()) {

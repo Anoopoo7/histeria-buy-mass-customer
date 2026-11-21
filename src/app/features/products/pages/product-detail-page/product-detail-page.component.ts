@@ -213,7 +213,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
               ></bm-pool-progress>
 
               <a [routerLink]="['/pools', pool.id]" class="bm-join-pool-btn">
-                <span>View Campaign</span>
+                <span>View Campaign & Join Group Deal</span>
                 <lucide-icon [img]="ChevronRightIcon" [size]="14"></lucide-icon>
               </a>
             </div>
