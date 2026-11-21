@@ -1377,7 +1377,8 @@ export class StoreDetailPageComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   addToCart(productId: string): void {
-    this.cartService.addItem(productId, 1).subscribe({
+    const prod = this.products().find((p) => p.id === productId);
+    this.cartService.addItem(productId, 1, prod || undefined).subscribe({
       next: () => {
         const storeId = this.store()?.id;
         if (storeId) {

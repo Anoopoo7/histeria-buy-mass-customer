@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs';
+import { AddedToCartModalComponent } from '../../shared/ui/added-to-cart-modal/added-to-cart-modal.component';
 import { ToastContainerComponent } from '../../shared/ui/toast/toast-container.component';
 import { BottomNavComponent } from '../bottom-nav/bottom-nav.component';
 import { TopHeaderComponent } from '../top-header/top-header.component';
@@ -15,6 +16,7 @@ import { TopHeaderComponent } from '../top-header/top-header.component';
     TopHeaderComponent,
     BottomNavComponent,
     ToastContainerComponent,
+    AddedToCartModalComponent,
   ],
   template: `
     <div class="bm-customer-app-layout">
@@ -35,6 +37,9 @@ import { TopHeaderComponent } from '../top-header/top-header.component';
 
       <!-- Global Notifications -->
       <bm-toast-container></bm-toast-container>
+
+      <!-- Global Added to Cart Popup Modal (Home, PLP, PDP, etc. except Cart) -->
+      <bm-added-to-cart-modal></bm-added-to-cart-modal>
     </div>
   `,
   styles: [`

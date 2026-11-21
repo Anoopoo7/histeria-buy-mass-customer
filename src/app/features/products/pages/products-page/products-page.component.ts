@@ -251,7 +251,8 @@ export class ProductsPageComponent implements OnInit {
   }
 
   addToCart(productId: string): void {
-    this.cartService.addItem(productId, 1).subscribe();
+    const prod = this.products().find((p) => p.id === productId);
+    this.cartService.addItem(productId, 1, prod || undefined).subscribe();
   }
 
   t(key: string, params?: Record<string, string | number>): string {

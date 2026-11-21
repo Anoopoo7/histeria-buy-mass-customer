@@ -3,6 +3,7 @@ import { Observable, catchError, map, of, tap } from 'rxjs';
 import { FormattedCart, FormattedCartItem, GetActiveCartsResponse, GetSubmittedCartsResponse, CartStatus } from '../models/cart.model';
 import { ApiClientService } from './api-client.service';
 import { AuthService } from './auth.service';
+import { AddedToCartData, CartModalService } from './cart-modal.service';
 import { ToastService } from './toast.service';
 
 @Injectable({
@@ -12,6 +13,7 @@ export class CartService {
   private readonly api = inject(ApiClientService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly cartModalService = inject(CartModalService);
 
   private readonly _carts = signal<FormattedCart[]>([]);
   readonly carts = this._carts.asReadonly();
@@ -67,24 +69,51 @@ export class CartService {
    * POST /api/v1/cart/items
    * Adds product to cart. The backend assigns it to the appropriate store cart.
    */
-  addItem(productId: string, quantity = 1): Observable<any> {
+  addItem(
+    productId: string,
+    quantity = 1,
+    productHint?: {
+      name?: string;
+      image?: string | null;
+      primaryImageUrl?: string | null;
+      price?: number;
+      storeName?: string;
+      category?: string;
+      brand?: string;
+    },
+  ): Observable<any> {
     if (!this.auth.isAuthenticated()) {
       this.toast.info('Please sign in to add items to your cart.');
       return of(null);
     }
 
     this._isLoading.set(true);
-    return this.api.post<{ message: string; cart: FormattedCart }>('/api/v1/cart/items', { productId, quantity }).pipe(
-      tap((res) => {
-        this.toast.success('Item added to store cart');
-        this.loadCarts().subscribe();
-      }),
-      catchError((err) => {
-        this._isLoading.set(false);
-        this.toast.error(err.message || 'Could not add item to cart');
-        return of(null);
-      }),
-    );
+    return this.api
+      .post<{ message: string; cart: FormattedCart }>('/api/v1/cart/items', { productId, quantity })
+      .pipe(
+        tap((res) => {
+          this.loadCarts().subscribe();
+
+          // Show added to cart popup across app (suppressed automatically on /cart)
+          const foundItem = res?.cart?.items?.find((i: any) => i.productId === productId);
+          const modalItem: AddedToCartData = {
+            productId,
+            name: productHint?.name || foundItem?.name || 'Vehicle',
+            image: productHint?.primaryImageUrl || productHint?.image || foundItem?.image || null,
+            price: productHint?.price ?? (foundItem?.currentPrice || foundItem?.priceAtAddition || 0),
+            quantity,
+            storeName: productHint?.storeName || res?.cart?.store?.name,
+            category: productHint?.category,
+            brand: productHint?.brand,
+          };
+          this.cartModalService.open(modalItem);
+        }),
+        catchError((err) => {
+          this._isLoading.set(false);
+          this.toast.error(err.message || 'Could not add item to cart');
+          return of(null);
+        }),
+      );
   }
 
   /**

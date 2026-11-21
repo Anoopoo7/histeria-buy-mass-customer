@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   ArrowRight,
@@ -43,8 +43,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
           <div class="bm-tab-content">
             <lucide-icon [img]="CarIcon" [size]="15"></lucide-icon>
             <span>Active Bookings</span>
-            @if (carts().length > 0) {
-              <span class="bm-tab-badge">{{ carts().length }}</span>
+            @if (activeCarts().length > 0) {
+              <span class="bm-tab-badge">{{ activeCarts().length }}</span>
             }
           </div>
         </button>
@@ -58,8 +58,8 @@ import { TranslationService } from '../../../../core/services/translation.servic
           <div class="bm-tab-content">
             <lucide-icon [img]="SparklesIcon" [size]="15"></lucide-icon>
             <span>Submitted to Pool</span>
-            @if (submittedPagination().total > 0) {
-              <span class="bm-tab-badge is-pool">{{ submittedPagination().total }}</span>
+            @if (activeSubmittedCarts().length > 0) {
+              <span class="bm-tab-badge is-pool">{{ activeSubmittedCarts().length }}</span>
             }
           </div>
         </button>
@@ -68,7 +68,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
       <!-- TAB 1: ACTIVE STORE CARTS -->
       @if (selectedTab() === 'active') {
         <!-- Store Separation Notice -->
-        @if (carts().length > 0) {
+        @if (activeCarts().length > 0) {
           <div class="bm-notice-box">
             <lucide-icon [img]="InfoIcon" [size]="16" class="text-primary"></lucide-icon>
             <p class="bm-notice-text">{{ t('cart_multi_notice') }}</p>
@@ -82,9 +82,9 @@ import { TranslationService } from '../../../../core/services/translation.servic
               <div class="bm-cart-skeleton bm-skeleton"></div>
             }
           </div>
-        } @else if (carts().length > 0) {
+        } @else if (activeCarts().length > 0) {
           <div class="bm-carts-container">
-            @for (cart of carts(); track cart.id) {
+            @for (cart of activeCarts(); track cart.id) {
               <div class="bm-store-cart-card">
                 <!-- Store Cart Header -->
                 <div class="bm-store-cart-head">
@@ -244,10 +244,10 @@ import { TranslationService } from '../../../../core/services/translation.servic
               <div class="bm-cart-skeleton bm-skeleton"></div>
             }
           </div>
-        } @else if (submittedCarts().length > 0) {
+        } @else if (activeSubmittedCarts().length > 0) {
           <!-- Submitted Carts List -->
           <div class="bm-carts-container">
-            @for (cart of submittedCarts(); track cart.id) {
+            @for (cart of activeSubmittedCarts(); track cart.id) {
               <div class="bm-store-cart-card is-submitted-card">
                 <!-- Store Header & Pool Badge -->
                 <div class="bm-store-cart-head">
@@ -953,9 +953,19 @@ export class CartPageComponent implements OnInit {
   readonly carts = this.cartService.carts;
   readonly isLoading = this.cartService.isLoading;
 
+  // Filter only carts that have at least 1 item
+  readonly activeCarts = computed(() => {
+    return this.carts().filter((cart) => cart.items && cart.items.length > 0);
+  });
+
   readonly selectedTab = signal<'active' | 'submitted'>('active');
   readonly submittedCarts = signal<FormattedCart[]>([]);
   readonly isSubmittedLoading = signal<boolean>(false);
+
+  // Filter only submitted carts that have at least 1 item
+  readonly activeSubmittedCarts = computed(() => {
+    return this.submittedCarts().filter((cart) => cart.items && cart.items.length > 0);
+  });
   readonly submittedPagination = signal<SubmittedCartsPagination>({
     total: 0,
     page: 1,

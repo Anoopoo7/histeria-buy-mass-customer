@@ -1312,11 +1312,13 @@ export class ProductDetailPageComponent implements OnInit {
   }
 
   addToCart(productId: string): void {
+    const prod = this.product();
+    const qty = this.quantity();
+
     this.isAdding.set(true);
-    this.cartService.addItem(productId, this.quantity()).subscribe({
+    this.cartService.addItem(productId, qty, prod || undefined).subscribe({
       next: () => {
         this.isAdding.set(false);
-        this.toast.success(`Added ${this.quantity()} item(s) to cart`);
       },
       error: () => {
         this.isAdding.set(false);
@@ -1326,7 +1328,7 @@ export class ProductDetailPageComponent implements OnInit {
 
   bookNow(productId: string): void {
     this.isAdding.set(true);
-    this.cartService.addItem(productId, this.quantity()).subscribe({
+    this.cartService.addItem(productId, this.quantity(), this.product() || undefined).subscribe({
       next: () => {
         this.isAdding.set(false);
         this.router.navigate(['/cart']);
@@ -1338,11 +1340,8 @@ export class ProductDetailPageComponent implements OnInit {
   }
 
   addRelatedToCart(productId: string): void {
-    this.cartService.addItem(productId, 1).subscribe({
-      next: () => {
-        this.toast.success('Vehicle added to booking list');
-      },
-    });
+    const rel = this.relatedProducts().find((p) => p.id === productId);
+    this.cartService.addItem(productId, 1, rel || undefined).subscribe();
   }
 
   openLightbox(url: string): void {

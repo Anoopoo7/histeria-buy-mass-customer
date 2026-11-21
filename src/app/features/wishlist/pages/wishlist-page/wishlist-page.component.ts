@@ -186,7 +186,8 @@ export class WishlistPageComponent {
   readonly items = signal<ProductRecord[]>([]);
 
   addToCart(productId: string): void {
-    this.cartService.addItem(productId, 1).subscribe();
+    const prod = this.items().find((p) => p.id === productId);
+    this.cartService.addItem(productId, 1, prod || undefined).subscribe();
   }
 
   t(key: string, params?: Record<string, string | number>): string {
