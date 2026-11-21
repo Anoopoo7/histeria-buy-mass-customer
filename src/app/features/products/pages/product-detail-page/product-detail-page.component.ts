@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   ArrowLeft,
   Check,
@@ -12,6 +12,7 @@ import {
   Plus,
   Share2,
   ShieldCheck,
+  ShoppingCart,
   Car,
   Sparkles,
   Store,
@@ -48,6 +49,13 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
         </a>
 
         <div class="bm-top-right-actions">
+          <a routerLink="/cart" class="bm-icon-circle-btn bm-cart-circle-btn" aria-label="View Cart">
+            <lucide-icon [img]="ShoppingCartIcon" [size]="18"></lucide-icon>
+            @if (cartCount() > 0) {
+              <span class="bm-top-badge">{{ cartCount() > 99 ? '99+' : cartCount() }}</span>
+            }
+          </a>
+
           <button
             type="button"
             class="bm-icon-circle-btn"
@@ -205,11 +213,24 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
               ></bm-pool-progress>
 
               <a [routerLink]="['/pools', pool.id]" class="bm-join-pool-btn">
-                <span>View Campaign & Join Group Deal</span>
+                <span>View Campaign</span>
                 <lucide-icon [img]="ChevronRightIcon" [size]="14"></lucide-icon>
               </a>
             </div>
           }
+
+          <!-- Quick Action Buttons in Info Card -->
+          <div class="bm-card-action-row">
+            <button
+              type="button"
+              class="bm-card-add-cart-btn"
+              [disabled]="isAdding()"
+              (click)="addToCart(prod.id)"
+            >
+              <lucide-icon [img]="ShoppingCartIcon" [size]="16"></lucide-icon>
+              <span>{{ isAdding() ? 'Adding...' : 'Add to Cart' }}</span>
+            </button>
+          </div>
 
           <!-- Store Pickup Information Notice -->
           <div class="bm-pickup-notice-box">
@@ -327,16 +348,27 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
             </button>
           </div>
 
-          <!-- Add to Store Cart Button -->
+          <!-- Add to Cart Button -->
+          <button
+            type="button"
+            class="bm-add-cart-outline-btn"
+            [disabled]="isAdding()"
+            (click)="addToCart(prod.id)"
+          >
+            <lucide-icon [img]="ShoppingCartIcon" [size]="17"></lucide-icon>
+            <span>{{ isAdding() ? 'Adding...' : 'Add to Cart' }}</span>
+          </button>
+
+          <!-- Book Now / Direct Booking Button -->
           <button
             type="button"
             class="bm-add-submit-btn"
             [disabled]="isAdding()"
-            (click)="addToCart(prod.id)"
+            (click)="bookNow(prod.id)"
           >
-            <lucide-icon [img]="CarIcon" [size]="18"></lucide-icon>
+            <lucide-icon [img]="CarIcon" [size]="17"></lucide-icon>
             <span>
-              {{ isAdding() ? 'Booking...' : 'Book Vehicle • ₹' + ((prod.price * quantity()) | number) }}
+              {{ isAdding() ? 'Booking...' : 'Book • ₹' + ((prod.price * quantity()) | number) }}
             </span>
           </button>
         </div>
@@ -401,6 +433,29 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
         border-color: #fca5a5;
         background-color: #fef2f2;
       }
+    }
+
+    .bm-cart-circle-btn {
+      position: relative;
+    }
+
+    .bm-top-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background-color: var(--bm-color-primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 17px;
+      height: 17px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      border: 2px solid var(--bm-color-surface);
+      line-height: 1;
     }
 
     .is-filled {
@@ -679,6 +734,64 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
         background-color: var(--bm-color-surface-subtle);
         color: var(--bm-color-text-secondary);
         border: 1px solid var(--bm-color-border);
+      }
+    }
+
+    .bm-card-action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .bm-card-add-cart-btn {
+      flex: 1;
+      height: 40px;
+      background-color: var(--bm-color-primary-soft);
+      color: var(--bm-color-primary);
+      border: 1px solid var(--bm-color-primary-border);
+      border-radius: var(--bm-radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: #d1fae5;
+      }
+
+      &:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+    }
+
+    .bm-card-book-now-btn {
+      flex: 1;
+      height: 40px;
+      background-color: var(--bm-color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--bm-radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--bm-color-primary-hover);
+      }
+
+      &:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
       }
     }
 
@@ -998,20 +1111,48 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
       font-size: 14px;
     }
 
-    .bm-add-submit-btn {
+    .bm-add-cart-outline-btn {
       flex: 1;
+      height: 44px;
+      background-color: var(--bm-color-primary-soft);
+      color: var(--bm-color-primary);
+      border: 1.5px solid var(--bm-color-primary-border);
+      border-radius: var(--bm-radius-md);
+      font-size: 13.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+
+      &:hover {
+        background-color: #d1fae5;
+      }
+
+      &:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+    }
+
+    .bm-add-submit-btn {
+      flex: 1.2;
       height: 44px;
       background-color: var(--bm-color-primary);
       color: #fff;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
       border: none;
       border-radius: var(--bm-radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
+      white-space: nowrap;
       transition: background-color 0.15s ease;
 
       &:hover {
@@ -1065,11 +1206,12 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
 export class ProductDetailPageComponent implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly poolService = inject(PoolService);
-  private readonly cartService = inject(CartService);
+  readonly cartService = inject(CartService);
   private readonly recentService = inject(RecentlyViewedService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslationService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly ArrowLeftIcon = ArrowLeft;
   readonly StoreIcon = Store;
@@ -1078,12 +1220,15 @@ export class ProductDetailPageComponent implements OnInit {
   readonly PlusIcon = Plus;
   readonly MinusIcon = Minus;
   readonly CarIcon = Car;
+  readonly ShoppingCartIcon = ShoppingCart;
   readonly HeartIcon = Heart;
   readonly Share2Icon = Share2;
   readonly CheckIcon = Check;
   readonly ShieldCheckIcon = ShieldCheck;
   readonly MapPinIcon = MapPin;
   readonly CloseIcon = X;
+
+  readonly cartCount = this.cartService.totalItemCount;
 
   readonly product = signal<ProductRecord | null>(null);
   readonly activeImage = signal<string>('');
@@ -1171,7 +1316,20 @@ export class ProductDetailPageComponent implements OnInit {
     this.cartService.addItem(productId, this.quantity()).subscribe({
       next: () => {
         this.isAdding.set(false);
-        this.toast.success(`Added ${this.quantity()} vehicle(s) to booking list`);
+        this.toast.success(`Added ${this.quantity()} item(s) to cart`);
+      },
+      error: () => {
+        this.isAdding.set(false);
+      },
+    });
+  }
+
+  bookNow(productId: string): void {
+    this.isAdding.set(true);
+    this.cartService.addItem(productId, this.quantity()).subscribe({
+      next: () => {
+        this.isAdding.set(false);
+        this.router.navigate(['/cart']);
       },
       error: () => {
         this.isAdding.set(false);
@@ -1231,7 +1389,7 @@ export class ProductDetailPageComponent implements OnInit {
           text: `Check out ${prod.name} on BuyMass for ₹${prod.price}!`,
           url,
         })
-        .catch(() => {});
+        .catch(() => { });
     } else if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       this.toast.success('Product link copied to clipboard!');
