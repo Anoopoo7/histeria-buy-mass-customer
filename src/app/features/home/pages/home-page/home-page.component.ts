@@ -15,6 +15,7 @@ import {
   Tag,
 } from 'lucide-angular';
 import { LucideAngularModule } from 'lucide-angular';
+import { DiscoveryRadius } from '../../../../core/models/location.model';
 import { PoolRecord } from '../../../../core/models/pool.model';
 import { ProductRecord } from '../../../../core/models/product.model';
 import { StoreRecord } from '../../../../core/models/store.model';
@@ -27,6 +28,7 @@ import { StoreService } from '../../../../core/services/store.service';
 import { TranslationService } from '../../../../core/services/translation.service';
 import { CountdownTimerComponent } from '../../../../shared/ui/countdown-timer/countdown-timer.component';
 import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-progress.component';
+import { RadiusSelectorComponent } from '../../../../shared/ui/radius-selector/radius-selector.component';
 import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 export interface CategoryCard {
@@ -56,6 +58,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
     LucideAngularModule,
     CountdownTimerComponent,
     PoolProgressComponent,
+    RadiusSelectorComponent,
   ],
   template: `
     <div class="bm-home-view">
@@ -65,6 +68,11 @@ export const HOME_CATEGORIES: CategoryCard[] = [
           <lucide-icon [img]="SearchIcon" [size]="18" class="bm-search-icon"></lucide-icon>
           <span class="bm-search-placeholder">{{ t('search_placeholder') }}</span>
         </a>
+      </section>
+
+      <!-- Discovery Radius Selector Widget -->
+      <section class="bm-home-radius-wrap">
+        <bm-radius-selector variant="inline" (radiusChange)="onRadiusChange($event)"></bm-radius-selector>
       </section>
 
       <!-- Active Group-Buying Pools (Core Highlight) -->
@@ -148,9 +156,15 @@ export const HOME_CATEGORIES: CategoryCard[] = [
             }
           </div>
         } @else {
-          <div class="bm-empty-banner">
-            <p>No active vehicle group deals found within {{ radius() }} km right now.</p>
-            <a routerLink="/location" class="bm-inline-link">Change discovery radius</a>
+          <div class="bm-empty-zone-card">
+            <p class="bm-empty-zone-msg">
+              No active pools within {{ radius() >= 10000 ? 'any distance' : radius() + ' km' }}.
+            </p>
+            @if (radius() < 10000) {
+              <button type="button" class="bm-switch-nolimit-btn" (click)="setNoLimit()">
+                Show All Pools (Whole Kerala)
+              </button>
+            }
           </div>
         }
       </section>
@@ -232,9 +246,15 @@ export const HOME_CATEGORIES: CategoryCard[] = [
             }
           </div>
         } @else {
-          <div class="bm-empty-banner">
-            <p>No authorized dealerships found within {{ radius() }} km.</p>
-            <a routerLink="/location" class="bm-inline-link">Adjust radius or location</a>
+          <div class="bm-empty-zone-card">
+            <p class="bm-empty-zone-msg">
+              No authorized dealerships within {{ radius() >= 10000 ? 'any distance' : radius() + ' km' }}.
+            </p>
+            @if (radius() < 10000) {
+              <button type="button" class="bm-switch-nolimit-btn" (click)="setNoLimit()">
+                Show All Dealers (Whole Kerala)
+              </button>
+            }
           </div>
         }
       </section>
@@ -341,6 +361,45 @@ export const HOME_CATEGORIES: CategoryCard[] = [
 
     .bm-home-search-wrap {
       width: 100%;
+    }
+
+    .bm-home-radius-wrap {
+      width: 100%;
+      margin-top: -6px;
+    }
+
+    .bm-empty-zone-card {
+      padding: 16px 14px;
+      text-align: center;
+      background-color: var(--bm-color-surface);
+      border: 1px dashed var(--bm-color-border);
+      border-radius: var(--bm-radius-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bm-empty-zone-msg {
+      font-size: 12px;
+      color: var(--bm-color-text-secondary);
+      margin: 0;
+    }
+
+    .bm-switch-nolimit-btn {
+      padding: 5px 14px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #fff;
+      background-color: var(--bm-color-primary);
+      border: none;
+      border-radius: var(--bm-radius-full);
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--bm-color-primary-dark, #1d4ed8);
+      }
     }
 
     .bm-search-input-fake {
@@ -890,6 +949,7 @@ export class HomePageComponent implements OnInit {
 
   readonly categories = HOME_CATEGORIES;
   readonly radius = this.locationService.radiusKm;
+  readonly locationLabel = this.locationService.formattedLocationLabel;
   readonly isMalayalam = this.i18n.isMalayalam;
   readonly recentProducts = this.recentService.recentProducts;
 
@@ -932,6 +992,15 @@ export class HomePageComponent implements OnInit {
       },
       error: () => this.isLoadingProducts.set(false),
     });
+  }
+
+  setNoLimit(): void {
+    this.locationService.setRadius(10000);
+    this.loadHomeData();
+  }
+
+  onRadiusChange(newRadius: DiscoveryRadius): void {
+    this.loadHomeData();
   }
 
   addToCart(productId: string): void {

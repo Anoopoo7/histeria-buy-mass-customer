@@ -119,6 +119,7 @@ export class PoolService {
     minDiscountPercentage?: number;
     page?: number;
     limit?: number;
+    ignoreLocation?: boolean;
   }): Observable<{ pools: PoolRecord[]; total: number }> {
     const loc = this.locationService.currentLocation();
     const queryParams: Record<string, string | number | undefined> = {
@@ -130,7 +131,7 @@ export class PoolService {
       limit: params?.limit || 20,
     };
 
-    if (loc.latitude && loc.longitude) {
+    if (!params?.ignoreLocation && loc.latitude && loc.longitude) {
       queryParams['lat'] = loc.latitude;
       queryParams['long'] = loc.longitude;
       queryParams['radiusKm'] = loc.radiusKm;

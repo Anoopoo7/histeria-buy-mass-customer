@@ -19,7 +19,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
         <h1 class="bm-page-title">{{ t('sec_nearby_stores') }}</h1>
         <div class="bm-page-loc-badge">
           <lucide-icon [img]="MapPinIcon" [size]="12"></lucide-icon>
-          <span>{{ radius() }} km radius</span>
+          <span>{{ radius() >= 10000 ? 'Whole Kerala' : radius() + ' km radius' }}</span>
         </div>
       </div>
 

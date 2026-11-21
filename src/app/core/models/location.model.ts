@@ -25,7 +25,7 @@ export interface SavedAddress {
   isDefault?: boolean;
 }
 
-export const ALLOWED_RADIUS_KM = [1, 3, 5, 10, 20, 30, 50] as const;
+export const ALLOWED_RADIUS_KM = [5, 10, 20, 50, 10000] as const;
 export type DiscoveryRadius = typeof ALLOWED_RADIUS_KM[number];
 
 export const KERALA_CITY_PRESETS: Array<{ name: string; district: string; lat: number; lng: number }> = [

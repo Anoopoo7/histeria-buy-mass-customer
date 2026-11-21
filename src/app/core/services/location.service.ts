@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { CustomerLocation, DiscoveryRadius, KERALA_CITY_PRESETS, SavedAddress } from '../models/location.model';
+import { ALLOWED_RADIUS_KM, CustomerLocation, DiscoveryRadius, KERALA_CITY_PRESETS, SavedAddress } from '../models/location.model';
 
 @Injectable({
   providedIn: 'root',
@@ -284,7 +284,7 @@ export class LocationService {
       const stored = localStorage.getItem(this.STORAGE_RADIUS_KEY);
       if (stored) {
         const val = parseInt(stored, 10);
-        if ([1, 3, 5, 10, 20, 30, 50].includes(val)) {
+        if ((ALLOWED_RADIUS_KM as readonly number[]).includes(val)) {
           return val as DiscoveryRadius;
         }
       }

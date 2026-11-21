@@ -32,7 +32,7 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
         </div>
         <div class="bm-radius-pill">
           <lucide-icon [img]="MapPinIcon" [size]="12"></lucide-icon>
-          <span>{{ radius() }} km</span>
+          <span>{{ radius() >= 10000 ? 'Whole Kerala' : radius() + ' km' }}</span>
         </div>
       </div>
 

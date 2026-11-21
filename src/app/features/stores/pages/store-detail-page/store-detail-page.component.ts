@@ -149,7 +149,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
             (click)="setActiveStoreTab('photos')"
           >
             <lucide-icon [img]="ImageIcon" [size]="15"></lucide-icon>
-            <span>Showroom Photos ({{ storeImages().length }})</span>
+            <span>Showroom Photos</span>
           </button>
         </div>
 

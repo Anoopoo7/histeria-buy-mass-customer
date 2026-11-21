@@ -35,6 +35,7 @@ export class StoreService {
     lat?: number;
     lng?: number;
     radiusKm?: number;
+    ignoreLocation?: boolean;
   }): Observable<{ stores: StoreRecord[]; total: number }> {
     const loc = this.locationService.currentLocation();
     const lat = params?.lat !== undefined ? params.lat : loc.latitude;
@@ -49,7 +50,7 @@ export class StoreService {
       limit: params?.limit || 20,
     };
 
-    if (lat !== null && lng !== null && lat !== undefined && lng !== undefined) {
+    if (!params?.ignoreLocation && lat !== null && lng !== null && lat !== undefined && lng !== undefined) {
       queryParams['lat'] = lat;
       queryParams['long'] = lng;
       queryParams['radiusKm'] = radius;

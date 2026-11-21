@@ -62,7 +62,7 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
       <div class="bm-radius-indicator">
         <div class="bm-radius-meta">
           <lucide-icon [img]="MapPinIcon" [size]="14" class="text-primary"></lucide-icon>
-          <span>{{ locationLabel() }} (within {{ radius() }} km)</span>
+          <span>{{ locationLabel() }} ({{ radius() >= 10000 ? 'Whole Kerala' : 'within ' + radius() + ' km' }})</span>
         </div>
         <a routerLink="/location" class="bm-radius-change-link">{{ t('loc_change') }}</a>
       </div>
@@ -174,7 +174,7 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
             </div>
           } @else {
             <div class="bm-empty-tab">
-              <p>No vehicles found matching this category within {{ radius() }} km.</p>
+              <p>No vehicles found matching this category within {{ radius() >= 10000 ? 'any distance' : radius() + ' km' }}.</p>
             </div>
           }
         }
@@ -236,7 +236,7 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
             </div>
           } @else {
             <div class="bm-empty-box">
-              <p>No partner stores found within {{ radius() }} km.</p>
+              <p>No partner stores found within {{ radius() >= 10000 ? 'any distance' : radius() + ' km' }}.</p>
             </div>
           }
         }

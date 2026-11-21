@@ -5,7 +5,9 @@ import { RouterModule } from '@angular/router';
 import {
   ArrowLeft,
   Clock,
+  Globe,
   LucideAngularModule,
+  MapPin,
   Plus,
   Search,
   ShoppingBag,
@@ -14,20 +16,23 @@ import {
   X,
 } from 'lucide-angular';
 import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { DiscoveryRadius } from '../../../../core/models/location.model';
 import { PoolRecord } from '../../../../core/models/pool.model';
 import { ProductRecord } from '../../../../core/models/product.model';
 import { StoreRecord } from '../../../../core/models/store.model';
 import { CartService } from '../../../../core/services/cart.service';
+import { LocationService } from '../../../../core/services/location.service';
 import { PoolService } from '../../../../core/services/pool.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { StoreService } from '../../../../core/services/store.service';
 import { TranslationService } from '../../../../core/services/translation.service';
 import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
+import { RadiusSelectorComponent } from '../../../../shared/ui/radius-selector/radius-selector.component';
 
 @Component({
   selector: 'bm-search-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule, RadiusSelectorComponent],
   template: `
     <div class="bm-search-view">
       <!-- Search Input Top Bar -->
@@ -53,6 +58,9 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
           }
         </div>
       </div>
+
+      <!-- Discovery Radius Selector Widget -->
+      <bm-radius-selector variant="inline" (radiusChange)="onSearchRadiusChange($event)"></bm-radius-selector>
 
       <!-- Scope Tabs (All, Products, Stores, Pools) -->
       <div class="bm-tabs-bar">
@@ -221,7 +229,12 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
             <div class="bm-no-results">
               <lucide-icon [img]="SearchIcon" [size]="32" class="text-muted"></lucide-icon>
               <h4>{{ t('search_no_results') }} "{{ searchQuery }}"</h4>
-              <p>Try searching for vehicle models like "Punch", "Swift", "Classic 350", "Activa" or showroom names.</p>
+              <p>No results found within {{ radius() >= 10000 ? 'any distance' : radius() + ' km' }}.</p>
+              @if (radius() < 10000) {
+                <button type="button" class="bm-switch-nolimit-btn" (click)="setSearchNoLimit()">
+                  Search All Kerala
+                </button>
+              }
             </div>
           }
         </div>
@@ -236,10 +249,73 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
       gap: 12px;
     }
 
+    .bm-switch-nolimit-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      background-color: var(--bm-color-primary);
+      border: none;
+      border-radius: var(--bm-radius-full);
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--bm-color-primary-dark, #1d4ed8);
+      }
+    }
+
     .bm-search-header {
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+
+    .bm-search-loc-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background-color: var(--bm-color-surface-subtle);
+      border-radius: var(--bm-radius-md);
+      border: 1px solid var(--bm-color-border-subtle);
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .bm-search-loc-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      color: var(--bm-color-text-secondary);
+    }
+
+    .bm-loc-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+    }
+
+    .bm-search-loc-btn {
+      background: none;
+      border: 1px solid var(--bm-color-border);
+      border-radius: var(--bm-radius-full);
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--bm-color-primary);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &.is-statewide {
+        background-color: var(--bm-color-primary);
+        color: #fff;
+        border-color: var(--bm-color-primary);
+      }
     }
 
     .bm-back-btn {
@@ -559,6 +635,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private readonly storeService = inject(StoreService);
   private readonly poolService = inject(PoolService);
   private readonly cartService = inject(CartService);
+  private readonly locationService = inject(LocationService);
   private readonly i18n = inject(TranslationService);
 
   readonly ArrowLeftIcon = ArrowLeft;
@@ -566,8 +643,13 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   readonly XIcon = X;
   readonly ClockIcon = Clock;
   readonly PlusIcon = Plus;
+  readonly GlobeIcon = Globe;
+  readonly MapPinIcon = MapPin;
   readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
   readonly StoreIcon = Store;
+
+  readonly radius = this.locationService.radiusKm;
+  readonly locationLabel = this.locationService.formattedLocationLabel;
 
   searchQuery = '';
   readonly selectedScope = signal<'all' | 'products' | 'stores' | 'pools'>('all');
@@ -629,6 +711,19 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   addToCart(productId: string): void {
     const prod = this.products().find((p) => p.id === productId);
     this.cartService.addItem(productId, 1, prod || undefined).subscribe();
+  }
+
+  setSearchNoLimit(): void {
+    this.locationService.setRadius(10000);
+    if (this.searchQuery.trim()) {
+      this.performSearch(this.searchQuery);
+    }
+  }
+
+  onSearchRadiusChange(newRadius: DiscoveryRadius): void {
+    if (this.searchQuery.trim()) {
+      this.performSearch(this.searchQuery);
+    }
   }
 
   t(key: string, params?: Record<string, string | number>): string {
