@@ -24,7 +24,7 @@ import { TranslationService } from '../../../core/services/translation.service';
               [class.is-active]="rad === currentRadius()"
               (click)="selectRadius(rad)"
             >
-              {{ rad >= 10000 ? 'Whole Kerala' : rad + ' km' }}
+              {{ rad >= 10000 ? 'Kerala' : rad + ' km' }}
             </button>
           }
         </div>
@@ -48,7 +48,7 @@ import { TranslationService } from '../../../core/services/translation.service';
               [class.is-active]="rad === currentRadius()"
               (click)="selectRadius(rad)"
             >
-              {{ rad >= 10000 ? 'Whole Kerala' : rad + ' km' }}
+              {{ rad >= 10000 ? 'Kerala' : rad + ' km' }}
             </button>
           }
         </div>

@@ -62,7 +62,7 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
       <div class="bm-radius-indicator">
         <div class="bm-radius-meta">
           <lucide-icon [img]="MapPinIcon" [size]="14" class="text-primary"></lucide-icon>
-          <span>{{ locationLabel() }} ({{ radius() >= 10000 ? 'Whole Kerala' : 'within ' + radius() + ' km' }})</span>
+          <span>{{ locationLabel() }} ({{ radius() >= 10000 ? 'Kerala' : 'within ' + radius() + ' km' }})</span>
         </div>
         <a routerLink="/location" class="bm-radius-change-link">{{ t('loc_change') }}</a>
       </div>

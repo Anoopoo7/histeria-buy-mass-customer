@@ -5,14 +5,10 @@ import {
   ArrowRight,
   Car,
   ChevronRight,
-  Clock,
-  Compass,
-  MapPin,
   Plus,
   Search,
   Sparkles,
   Store,
-  Tag,
 } from 'lucide-angular';
 import { LucideAngularModule } from 'lucide-angular';
 import { DiscoveryRadius } from '../../../../core/models/location.model';
@@ -28,7 +24,6 @@ import { StoreService } from '../../../../core/services/store.service';
 import { TranslationService } from '../../../../core/services/translation.service';
 import { CountdownTimerComponent } from '../../../../shared/ui/countdown-timer/countdown-timer.component';
 import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-progress.component';
-import { RadiusSelectorComponent } from '../../../../shared/ui/radius-selector/radius-selector.component';
 import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 export interface CategoryCard {
@@ -58,7 +53,6 @@ export const HOME_CATEGORIES: CategoryCard[] = [
     LucideAngularModule,
     CountdownTimerComponent,
     PoolProgressComponent,
-    RadiusSelectorComponent,
   ],
   template: `
     <div class="bm-home-view">
@@ -69,12 +63,6 @@ export const HOME_CATEGORIES: CategoryCard[] = [
           <span class="bm-search-placeholder">{{ t('search_placeholder') }}</span>
         </a>
       </section>
-
-      <!-- Discovery Radius Selector Widget -->
-      <section class="bm-home-radius-wrap">
-        <bm-radius-selector variant="inline" (radiusChange)="onRadiusChange($event)"></bm-radius-selector>
-      </section>
-
       <!-- Active Group-Buying Pools (Core Highlight) -->
       <section class="bm-section">
         <div class="bm-section-head">
@@ -162,7 +150,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
             </p>
             @if (radius() < 10000) {
               <button type="button" class="bm-switch-nolimit-btn" (click)="setNoLimit()">
-                Show All Pools (Whole Kerala)
+                Show All Pools (Kerala)
               </button>
             }
           </div>
@@ -252,7 +240,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
             </p>
             @if (radius() < 10000) {
               <button type="button" class="bm-switch-nolimit-btn" (click)="setNoLimit()">
-                Show All Dealers (Whole Kerala)
+                Show All Dealers (Kerala)
               </button>
             }
           </div>
