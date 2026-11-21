@@ -44,7 +44,7 @@ export const TRANSLATIONS: TranslationDictionary = {
   loc_save_address: { en: 'Save & Continue', ml: 'സംരക്ഷിച്ച് മുന്നോട്ട് പോകുക' },
 
   // Search
-  search_placeholder: { en: 'Search cars, bikes, showrooms or models (e.g. Punch, Swift)', ml: 'കാറുകൾ, ബൈക്കുകൾ, ഷോറൂമുകൾ തിരയുക (ഉദാ: Punch, Swift)' },
+  search_placeholder: { en: 'Search cars, bikes, showrooms or models', ml: 'കാറുകൾ, ബൈക്കുകൾ, ഷോറൂമുകൾ തിരയുക' },
   search_all: { en: 'All', ml: 'എല്ലാം' },
   search_products: { en: 'Vehicles', ml: 'വാഹനങ്ങൾ' },
   search_stores: { en: 'Showrooms', ml: 'ഷോറൂമുകൾ' },

@@ -335,6 +335,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
     }
 
     .bm-section {
+      margin-bottom: 28px;
       display: flex;
       flex-direction: column;
       gap: 12px;
