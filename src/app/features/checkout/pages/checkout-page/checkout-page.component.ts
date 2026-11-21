@@ -559,121 +559,36 @@ export class CheckoutPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
-      const id = params['storeId'];
-      if (id) {
+      const storeId = params['storeId'];
+      if (storeId) {
         this.isLoading.set(true);
-        this.isLoadingPool.set(true);
-
         this.cartService.loadCarts().subscribe({
           next: () => {
-            const allCarts = this.cartService.carts();
-            const matchingCart =
-              allCarts.find((c) => c.store?.id === id || c.id === id) ||
-              this.cartService.getStoreCart(id);
-
+            const matchingCart = this.cartService.getStoreCart(storeId);
             this.cart.set(matchingCart || null);
             this.isLoading.set(false);
+          },
+          error: () => this.isLoading.set(false),
+        });
 
-            const actualStoreId = matchingCart ? matchingCart.store.id : id;
-            this.fetchActivePoolForStore(actualStoreId, matchingCart || undefined);
+        // Check strictly for ACTIVE pools for this store
+        this.isLoadingPool.set(true);
+        this.poolService.getPools({ storeId, limit: 10, ignoreLocation: true }).subscribe({
+          next: (res) => {
+            // Strictly check for ACTIVE status
+            const active = res.pools.find((p) => p.status === 'ACTIVE');
+            this.activeStorePool.set(active || null);
+            this.isLoadingPool.set(false);
           },
           error: () => {
-            this.isLoading.set(false);
-            this.fetchActivePoolForStore(id);
+            this.activeStorePool.set(null);
+            this.isLoadingPool.set(false);
           },
         });
       } else {
         this.isLoading.set(false);
         this.isLoadingPool.set(false);
       }
-    });
-  }
-
-  isPoolActive(p: PoolRecord | null | undefined): boolean {
-    if (!p || !p.id) return false;
-
-    // Reject explicitly inactive/finalized pools
-    const inactive = ['CLOSED', 'CANCELLED', 'FINALIZED', 'COMPLETED', 'EXPIRED'];
-    if (p.status && inactive.includes(p.status.toUpperCase())) {
-      return false;
-    }
-
-    // Reject if live progress flags that the pool has ended
-    if (p.progress?.hasEnded === true) {
-      return false;
-    }
-
-    // Reject if endsAt timestamp has already passed
-    if (p.endsAt) {
-      const endTime = new Date(p.endsAt).getTime();
-      if (!isNaN(endTime) && endTime <= Date.now()) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  private fetchActivePoolForStore(storeId: string, cart?: FormattedCart): void {
-    this.isLoadingPool.set(true);
-
-    // If the cart is already tied to a pool, verify that pool first
-    if (cart?.pool?.id) {
-      this.poolService.getPoolById(cart.pool.id).subscribe({
-        next: (p) => {
-          if (p && this.isPoolActive(p)) {
-            this.activeStorePool.set(p);
-            this.isLoadingPool.set(false);
-            return;
-          }
-          this.queryStorePools(storeId, cart);
-        },
-        error: () => this.queryStorePools(storeId, cart),
-      });
-      return;
-    }
-
-    this.queryStorePools(storeId, cart);
-  }
-
-  private queryStorePools(storeId: string, cart?: FormattedCart): void {
-    // 1. Query pools targeted at this specific store
-    this.poolService.getPools({ storeId, limit: 10, ignoreLocation: true }).subscribe({
-      next: (res) => {
-        const active = res.pools.find((p) => this.isPoolActive(p));
-        if (active) {
-          this.activeStorePool.set(active);
-          this.isLoadingPool.set(false);
-        } else {
-          // 2. Fallback: Query all active discovery pools to match storeId or cart products
-          this.queryAllPoolsFallback(storeId, cart);
-        }
-      },
-      error: () => {
-        this.queryAllPoolsFallback(storeId, cart);
-      },
-    });
-  }
-
-  private queryAllPoolsFallback(storeId: string, cart?: FormattedCart): void {
-    this.poolService.getPools({ limit: 30, ignoreLocation: true }).subscribe({
-      next: (allRes) => {
-        const matched = allRes.pools.find((p) => {
-          if (!this.isPoolActive(p)) return false;
-          if (p.storeId === storeId) return true;
-          if (cart?.items && cart.items.length > 0) {
-            return cart.items.some((item) => p.productIds?.includes(item.productId));
-          }
-          return false;
-        });
-
-        this.activeStorePool.set(matched || null);
-        this.isLoadingPool.set(false);
-      },
-      error: () => {
-        this.activeStorePool.set(null);
-        this.isLoadingPool.set(false);
-      },
     });
   }
 
