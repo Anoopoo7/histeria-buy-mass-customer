@@ -5,6 +5,7 @@ import { ArrowLeft, Heart, LucideAngularModule, Plus, ShoppingBag } from 'lucide
 import { ProductRecord } from '../../../../core/models/product.model';
 import { CartService } from '../../../../core/services/cart.service';
 import { TranslationService } from '../../../../core/services/translation.service';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 @Component({
   selector: 'bm-wishlist-page',
@@ -24,7 +25,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
           @for (prod of items(); track prod.id) {
             <div class="bm-wishlist-card">
               <a [routerLink]="['/products', prod.id]" class="bm-link">
-                <img [src]="prod.primaryImageUrl || '/favicon.ico'" [alt]="prod.name" class="bm-img" />
+                <img [src]="prod.primaryImageUrl || vehiclePlaceholder" [alt]="prod.name" class="bm-img" loading="lazy" decoding="async" />
                 <div class="bm-meta">
                   <h4 class="bm-name">{{ prod.name }}</h4>
                   <span class="bm-price">₹{{ prod.price }}</span>
@@ -182,6 +183,7 @@ export class WishlistPageComponent {
   readonly ArrowLeftIcon = ArrowLeft;
   readonly HeartIcon = Heart;
   readonly PlusIcon = Plus;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
 
   readonly items = signal<ProductRecord[]>([]);
 

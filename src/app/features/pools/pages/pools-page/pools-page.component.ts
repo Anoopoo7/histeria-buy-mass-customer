@@ -10,6 +10,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
 import { parseTimestampMs } from '../../../../core/utils/date.utils';
 import { CountdownTimerComponent } from '../../../../shared/ui/countdown-timer/countdown-timer.component';
 import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-progress.component';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 @Component({
   selector: 'bm-pools-page',
@@ -76,10 +77,11 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
             <div class="bm-pool-card">
               <div class="bm-card-media">
                 <img
-                  [src]="pool.primaryImageUrl || '/favicon.ico'"
+                  [src]="pool.primaryImageUrl || vehiclePlaceholder"
                   [alt]="pool.title"
                   class="bm-card-img"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div class="bm-timer-badge">
                   <bm-countdown-timer [endsAt]="pool.endsAt"></bm-countdown-timer>
@@ -335,6 +337,7 @@ export class PoolsPageComponent implements OnInit {
   readonly MapPinIcon = MapPin;
   readonly SparklesIcon = Sparkles;
   readonly ArrowRightIcon = ArrowRight;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
 
   readonly pools = signal<PoolRecord[]>([]);
   readonly isLoading = signal<boolean>(true);

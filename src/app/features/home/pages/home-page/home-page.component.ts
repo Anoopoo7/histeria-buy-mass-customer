@@ -27,6 +27,7 @@ import { StoreService } from '../../../../core/services/store.service';
 import { TranslationService } from '../../../../core/services/translation.service';
 import { CountdownTimerComponent } from '../../../../shared/ui/countdown-timer/countdown-timer.component';
 import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-progress.component';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 export interface CategoryCard {
   id: string;
@@ -94,10 +95,11 @@ export const HOME_CATEGORIES: CategoryCard[] = [
               <div class="bm-pool-card">
                 <div class="bm-pool-img-wrap">
                   <img
-                    [src]="pool.primaryImageUrl || '/favicon.ico'"
+                    [src]="pool.primaryImageUrl || vehiclePlaceholder"
                     [alt]="pool.title"
                     class="bm-pool-img"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div class="bm-pool-badge-overlay">
                     <bm-countdown-timer [endsAt]="pool.endsAt"></bm-countdown-timer>
@@ -185,7 +187,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
               <a [routerLink]="['/stores', store.id]" class="bm-store-card">
                 <div class="bm-store-avatar">
                   @if (store.primaryImageUrl) {
-                    <img [src]="store.primaryImageUrl" [alt]="store.storeName" class="bm-store-img" />
+                    <img [src]="store.primaryImageUrl" [alt]="store.storeName" class="bm-store-img" loading="lazy" decoding="async" />
                   } @else {
                     <lucide-icon [img]="StoreIcon" [size]="20" class="bm-store-fallback-icon"></lucide-icon>
                   }
@@ -242,10 +244,11 @@ export const HOME_CATEGORIES: CategoryCard[] = [
                 <a [routerLink]="['/products', product.id]" class="bm-product-media-link">
                   <div class="bm-product-img-box">
                     <img
-                      [src]="product.primaryImageUrl || '/favicon.ico'"
+                      [src]="product.primaryImageUrl || vehiclePlaceholder"
                       [alt]="product.name"
                       class="bm-product-img"
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                   <div class="bm-product-meta">
@@ -285,7 +288,7 @@ export const HOME_CATEGORIES: CategoryCard[] = [
           <div class="bm-recent-scroll hide-scroll">
             @for (item of recentProducts(); track item.id) {
               <a [routerLink]="['/products', item.id]" class="bm-recent-card">
-                <img [src]="item.primaryImageUrl || '/favicon.ico'" [alt]="item.name" class="bm-recent-img" />
+                <img [src]="item.primaryImageUrl || vehiclePlaceholder" [alt]="item.name" class="bm-recent-img" loading="lazy" decoding="async" />
                 <span class="bm-recent-title">{{ item.name }}</span>
                 <span class="bm-recent-price">₹{{ item.price }}</span>
               </a>
@@ -834,6 +837,7 @@ export class HomePageComponent implements OnInit {
   readonly ChevronRightIcon = ChevronRight;
   readonly ArrowRightIcon = ArrowRight;
   readonly PlusIcon = Plus;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
 
   readonly categories = HOME_CATEGORIES;
   readonly radius = this.locationService.radiusKm;

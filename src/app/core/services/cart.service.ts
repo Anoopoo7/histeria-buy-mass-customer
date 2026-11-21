@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 import { FormattedCart, FormattedCartItem, GetActiveCartsResponse, GetSubmittedCartsResponse, CartStatus } from '../models/cart.model';
+import { optimizeImageUrl } from '../utils/image.utils';
 import { ApiClientService } from './api-client.service';
 import { AuthService } from './auth.service';
 import { AddedToCartData, CartModalService } from './cart-modal.service';
@@ -46,7 +47,16 @@ export class CartService {
 
     this._isLoading.set(true);
     return this.api.get<GetActiveCartsResponse>('/api/v1/cart').pipe(
-      map((res) => res?.carts || []),
+      map((res) => {
+        const carts = res?.carts || [];
+        return carts.map((c) => ({
+          ...c,
+          items: (c.items || []).map((item) => ({
+            ...item,
+            image: optimizeImageUrl(item.image, 'thumb'),
+          })),
+        }));
+      }),
       tap((carts) => {
         this._carts.set(carts);
         this._isLoading.set(false);
@@ -99,7 +109,7 @@ export class CartService {
           const modalItem: AddedToCartData = {
             productId,
             name: productHint?.name || foundItem?.name || 'Vehicle',
-            image: productHint?.primaryImageUrl || productHint?.image || foundItem?.image || null,
+            image: optimizeImageUrl(productHint?.primaryImageUrl || productHint?.image || foundItem?.image, 'thumb'),
             price: productHint?.price ?? (foundItem?.currentPrice || foundItem?.priceAtAddition || 0),
             quantity,
             storeName: productHint?.storeName || res?.cart?.store?.name,

@@ -21,6 +21,7 @@ import { PoolService } from '../../../../core/services/pool.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { StoreService } from '../../../../core/services/store.service';
 import { TranslationService } from '../../../../core/services/translation.service';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.component';
 
 @Component({
@@ -115,7 +116,7 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
                 <div class="bm-product-card">
                   <a [routerLink]="['/products', product.id]" class="bm-prod-link">
                     <div class="bm-prod-img-wrap">
-                      <img [src]="product.primaryImageUrl || '/favicon.ico'" [alt]="product.name" class="bm-prod-img" />
+                      <img [src]="product.primaryImageUrl || vehiclePlaceholder" [alt]="product.name" class="bm-prod-img" loading="lazy" decoding="async" />
                     </div>
                     <div class="bm-prod-meta">
                       <span class="bm-prod-store">{{ product.storeName || 'Authorized Dealer' }}</span>
@@ -146,7 +147,7 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
             <div class="bm-pools-list">
               @for (pool of pools(); track pool.id) {
                 <a [routerLink]="['/pools', pool.id]" class="bm-pool-row-card">
-                  <img [src]="pool.primaryImageUrl || '/favicon.ico'" [alt]="pool.title" class="bm-pool-thumb" />
+                  <img [src]="pool.primaryImageUrl || vehiclePlaceholder" [alt]="pool.title" class="bm-pool-thumb" loading="lazy" decoding="async" />
                   <div class="bm-pool-row-info">
                     <span class="bm-pool-store">{{ pool.storeName || 'Partner Store' }}</span>
                     <h3 class="bm-pool-row-title">{{ pool.title }}</h3>
@@ -175,7 +176,7 @@ import { HOME_CATEGORIES } from '../../../home/pages/home-page/home-page.compone
                 <a [routerLink]="['/stores', store.id]" class="bm-store-row-card">
                   <div class="bm-store-img-box">
                     @if (store.primaryImageUrl) {
-                      <img [src]="store.primaryImageUrl" [alt]="store.storeName" class="bm-store-img" />
+                      <img [src]="store.primaryImageUrl" [alt]="store.storeName" class="bm-store-img" loading="lazy" decoding="async" />
                     } @else {
                       <lucide-icon [img]="StoreIcon" [size]="20" class="text-primary"></lucide-icon>
                     }
@@ -560,6 +561,7 @@ export class ExplorePageComponent implements OnInit {
   readonly SparklesIcon = Sparkles;
   readonly StoreIcon = Store;
   readonly PlusIcon = Plus;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
 
   readonly categories = HOME_CATEGORIES;
   readonly radius = this.locationService.radiusKm;

@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Car, Check, LucideAngularModule, X } from 'lucide-angular';
 import { CartModalService } from '../../../core/services/cart-modal.service';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../core/utils/image.utils';
 
 @Component({
   selector: 'bm-added-to-cart-modal',
@@ -37,9 +38,11 @@ import { CartModalService } from '../../../core/services/cart-modal.service';
           <div class="bm-modal-product-card">
             <div class="bm-modal-prod-img-box">
               <img
-                [src]="item.image || '/favicon.ico'"
+                [src]="item.image || vehiclePlaceholder"
                 [alt]="item.name"
                 class="bm-modal-prod-img"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div class="bm-modal-prod-details">
@@ -357,6 +360,7 @@ export class AddedToCartModalComponent {
   readonly CheckIcon = Check;
   readonly CloseIcon = X;
   readonly CarIcon = Car;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
 
   close(): void {
     this.modal.close();

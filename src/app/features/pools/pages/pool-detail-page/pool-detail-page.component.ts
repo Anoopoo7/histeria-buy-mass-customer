@@ -23,6 +23,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { TranslationService } from '../../../../core/services/translation.service';
 import { CountdownTimerComponent } from '../../../../shared/ui/countdown-timer/countdown-timer.component';
 import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-progress.component';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 @Component({
   selector: 'bm-pool-detail-page',
@@ -47,9 +48,11 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
         <!-- Campaign Header Media -->
         <div class="bm-campaign-media">
           <img
-            [src]="p.primaryImageUrl || '/favicon.ico'"
+            [src]="p.primaryImageUrl || vehiclePlaceholder"
             [alt]="p.title"
             class="bm-campaign-img"
+            fetchpriority="high"
+            decoding="async"
           />
           <div class="bm-media-badges">
             <span class="bm-deal-badge">{{ t('pool_group_deal') }}</span>
@@ -139,9 +142,11 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
                     <div class="bm-eligible-item-row">
                       <div class="bm-eligible-thumb-wrap">
                         <img
-                          [src]="item.image || '/favicon.ico'"
+                          [src]="item.image || vehiclePlaceholder"
                           [alt]="item.name"
                           class="bm-eligible-thumb"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                       <div class="bm-eligible-info">
@@ -219,7 +224,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
                   <div class="bm-cart-item-icons-row">
                     @for (item of poolEligibleItems().slice(0, 3); track item.productId) {
                       <div class="bm-mini-item-icon-box">
-                        <img [src]="item.image || '/favicon.ico'" [alt]="item.name" class="bm-mini-item-thumb" />
+                        <img [src]="item.image || vehiclePlaceholder" [alt]="item.name" class="bm-mini-item-thumb" loading="lazy" decoding="async" />
                       </div>
                     }
                     @if (poolEligibleItems().length > 3) {
@@ -838,6 +843,7 @@ export class PoolDetailPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   readonly ArrowLeftIcon = ArrowLeft;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
   readonly StoreIcon = Store;
   readonly SparklesIcon = Sparkles;
   readonly HelpCircleIcon = HelpCircle;

@@ -3,6 +3,7 @@ import { Observable, catchError, map, of } from 'rxjs';
 import { ProductRecord } from '../models/product.model';
 import { ApiClientService } from './api-client.service';
 import { LocationService } from './location.service';
+import { optimizeImageUrl } from '../utils/image.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -137,9 +138,12 @@ export class ProductService {
           district: doc.store.district || doc.storeDistrict,
           state: doc.store.state || doc.storeState,
           location: doc.store.location,
-          primaryImageUrl: doc.store.primaryImageUrl,
+          primaryImageUrl: optimizeImageUrl(doc.store.primaryImageUrl, 'avatar'),
         }
       : undefined;
+
+    const optimizedPrimary = optimizeImageUrl(doc.primaryImageUrl || rawImages[0], 'card');
+    const optimizedImages = rawImages.map((u) => optimizeImageUrl(u, 'hero'));
 
     return {
       id: doc.id || doc._id,
@@ -157,9 +161,15 @@ export class ProductService {
       unit: doc.unit || 'unit',
       price,
       originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
-      primaryImageUrl: doc.primaryImageUrl || rawImages[0],
-      imageUrls: rawImages,
-      images: Array.isArray(doc.images) ? doc.images : undefined,
+      primaryImageUrl: optimizedPrimary,
+      imageUrls: optimizedImages,
+      images: Array.isArray(doc.images)
+        ? doc.images.map((img: any) =>
+            typeof img === 'string'
+              ? optimizeImageUrl(img, 'hero')
+              : { ...img, url: optimizeImageUrl(img?.url, 'hero') },
+          )
+        : undefined,
       status: doc.status || 'ACTIVE',
       distanceKm: doc.distanceKm,
       createdAt: doc.createdAt,

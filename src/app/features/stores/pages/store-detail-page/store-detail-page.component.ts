@@ -38,6 +38,7 @@ import { LocationService } from '../../../../core/services/location.service';
 import { PoolService } from '../../../../core/services/pool.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { RecentlyViewedService } from '../../../../core/services/recently-viewed.service';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 import { StoreService } from '../../../../core/services/store.service';
 import { TranslationService } from '../../../../core/services/translation.service';
 
@@ -60,6 +61,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
               [alt]="store()?.storeName"
               class="bm-carousel-img"
               loading="lazy"
+              decoding="async"
             />
 
             <!-- Left / Right Carousel Controls if multiple images -->
@@ -231,6 +233,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
                       [alt]="(store()?.storeName || 'Store') + ' photo ' + ($index + 1)"
                       class="bm-grid-img"
                       loading="lazy"
+                      decoding="async"
                     />
                     @if (getPhotoCategory($index)) {
                       <span class="bm-photo-category-tag">{{ getPhotoCategory($index) }}</span>
@@ -263,6 +266,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
             [src]="previewPhotoUrl()"
             alt="Store photo full view"
             class="bm-modal-img"
+            decoding="async"
             (click)="$event.stopPropagation()"
           />
         </div>
@@ -306,7 +310,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
               <div class="bm-prod-card">
                 <a [routerLink]="['/products', prod.id]" class="bm-prod-link">
                   <div class="bm-prod-img-box">
-                    <img [src]="prod.primaryImageUrl || '/favicon.ico'" [alt]="prod.name" class="bm-prod-img" />
+                    <img [src]="prod.primaryImageUrl || vehiclePlaceholder" [alt]="prod.name" class="bm-prod-img" loading="lazy" decoding="async" />
                   </div>
                   <div class="bm-prod-info">
                     <h4 class="bm-prod-title">{{ prod.name }}</h4>
@@ -1100,6 +1104,7 @@ export class StoreDetailPageComponent implements OnInit, AfterViewInit, OnDestro
   readonly CarIcon = Car;
   readonly ImageIcon = Image;
   readonly CloseIcon = X;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
 
   readonly store = signal<StoreRecord | null>(null);
   readonly products = signal<ProductRecord[]>([]);

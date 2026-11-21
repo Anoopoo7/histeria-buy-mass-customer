@@ -8,6 +8,7 @@ import { CartService } from '../../../../core/services/cart.service';
 import { LocationService } from '../../../../core/services/location.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { TranslationService } from '../../../../core/services/translation.service';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 @Component({
   selector: 'bm-products-page',
@@ -35,10 +36,11 @@ import { TranslationService } from '../../../../core/services/translation.servic
               <a [routerLink]="['/products', product.id]" class="bm-card-link">
                 <div class="bm-card-img-box">
                   <img
-                    [src]="product.primaryImageUrl || '/favicon.ico'"
+                    [src]="product.primaryImageUrl || vehiclePlaceholder"
                     [alt]="product.name"
                     class="bm-card-img"
                     loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div class="bm-card-meta">
@@ -227,6 +229,7 @@ export class ProductsPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   readonly PlusIcon = Plus;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
 
   readonly products = signal<ProductRecord[]>([]);
   readonly isLoading = signal<boolean>(true);

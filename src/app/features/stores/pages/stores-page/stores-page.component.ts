@@ -36,7 +36,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
             <a [routerLink]="['/stores', store.id]" class="bm-store-card">
               <div class="bm-store-avatar">
                 @if (store.primaryImageUrl) {
-                  <img [src]="store.primaryImageUrl" [alt]="store.storeName" class="bm-store-img" />
+                  <img [src]="store.primaryImageUrl" [alt]="store.storeName" class="bm-store-img" loading="lazy" decoding="async" />
                 } @else {
                   <lucide-icon [img]="StoreIcon" [size]="24" class="text-primary"></lucide-icon>
                 }

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { PoolLiveStatus, PoolParticipationRecord, PoolRecord, PoolTier } from '../models/pool.model';
 import { normalizeDateToIso } from '../utils/date.utils';
+import { optimizeImageUrl } from '../utils/image.utils';
 import { ApiClientService } from './api-client.service';
 import { LocationService } from './location.service';
 
@@ -160,7 +161,7 @@ export class PoolService {
             productIds: doc.productIds || [],
             productNames: doc.productNames || [],
             categories: doc.categories || [],
-            primaryImageUrl: doc.primaryImageUrl,
+            primaryImageUrl: optimizeImageUrl(doc.primaryImageUrl, 'banner'),
             startsAt: normalizeDateToIso(doc.startsAt),
             endsAt: normalizeDateToIso(doc.endsAt),
             status: doc.status || 'ACTIVE',
@@ -209,7 +210,7 @@ export class PoolService {
                 ],
                 targetAmount: p.targetAmount || 10000,
                 discountPercentage: p.discountPercentage || 10,
-                primaryImageUrl: p.primaryImageUrl,
+                primaryImageUrl: optimizeImageUrl(p.primaryImageUrl, 'banner'),
               }));
               return { pools, total: pools.length };
             }),
@@ -256,7 +257,7 @@ export class PoolService {
             p.discountPercentage || p.tiers?.[p.tiers.length - 1]?.discountPercentage || 10,
           currentParticipantCount: p.finalParticipantCount || 0,
           currentTotalAmount: p.finalCombinedValue || 0,
-          primaryImageUrl: p.primaryImageUrl,
+          primaryImageUrl: optimizeImageUrl(p.primaryImageUrl, 'hero'),
         } as PoolRecord;
       }),
       catchError(() => of(null)),

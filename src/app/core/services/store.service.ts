@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { StoreRecord } from '../models/store.model';
+import { optimizeImageUrl } from '../utils/image.utils';
 import { ApiClientService } from './api-client.service';
 import { LocationService } from './location.service';
 
@@ -162,18 +163,26 @@ export class StoreService {
     if (Array.isArray(doc.photos) && doc.photos.length > 0) {
       doc.photos.forEach((p: any) => {
         const url = typeof p === 'string' ? p : p?.url;
-        if (url) rawImages.push(url);
+        if (url) {
+          rawImages.push(optimizeImageUrl(url, 'hero'));
+        }
       });
     }
 
     if (Array.isArray(doc.imageUrls) && doc.imageUrls.length > 0) {
       doc.imageUrls.forEach((img: string) => {
-        if (img && !rawImages.includes(img)) rawImages.push(img);
+        if (img) {
+          const opt = optimizeImageUrl(img, 'hero');
+          if (!rawImages.includes(opt)) rawImages.push(opt);
+        }
       });
     }
 
-    if (doc.primaryImageUrl && !rawImages.includes(doc.primaryImageUrl)) {
-      rawImages.unshift(doc.primaryImageUrl);
+    if (doc.primaryImageUrl) {
+      const optPrimary = optimizeImageUrl(doc.primaryImageUrl, 'card');
+      if (!rawImages.includes(optPrimary)) {
+        rawImages.unshift(optPrimary);
+      }
     }
 
     return {
@@ -191,7 +200,7 @@ export class StoreService {
       latitude: lat,
       longitude: lng,
       location: doc.location,
-      primaryImageUrl: doc.primaryImageUrl || rawImages[0],
+      primaryImageUrl: optimizeImageUrl(doc.primaryImageUrl || rawImages[0], 'card'),
       photos: doc.photos,
       imageUrls: rawImages,
       status: doc.status || 'APPROVED',

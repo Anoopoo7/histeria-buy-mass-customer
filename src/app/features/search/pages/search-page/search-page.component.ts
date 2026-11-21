@@ -22,6 +22,7 @@ import { PoolService } from '../../../../core/services/pool.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { StoreService } from '../../../../core/services/store.service';
 import { TranslationService } from '../../../../core/services/translation.service';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 @Component({
   selector: 'bm-search-page',
@@ -131,7 +132,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
                   @for (prod of products(); track prod.id) {
                     <div class="bm-res-prod-card">
                       <a [routerLink]="['/products', prod.id]" class="bm-prod-link">
-                        <img [src]="prod.primaryImageUrl || '/favicon.ico'" [alt]="prod.name" class="bm-prod-img" />
+                        <img [src]="prod.primaryImageUrl || vehiclePlaceholder" [alt]="prod.name" class="bm-prod-img" loading="lazy" decoding="async" />
                         <div class="bm-prod-meta">
                           <span class="bm-store-name">{{ prod.storeName || 'Authorized Dealership' }}</span>
                           <span class="bm-prod-title">{{ prod.name }}</span>
@@ -179,7 +180,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
                 <div class="bm-res-pools-list">
                   @for (pool of pools(); track pool.id) {
                     <a [routerLink]="['/pools', pool.id]" class="bm-res-pool-card">
-                      <img [src]="pool.primaryImageUrl || '/favicon.ico'" [alt]="pool.title" class="bm-pool-img" />
+                      <img [src]="pool.primaryImageUrl || vehiclePlaceholder" [alt]="pool.title" class="bm-pool-img" loading="lazy" decoding="async" />
                       <div class="bm-pool-meta">
                         <span class="bm-pool-title">{{ pool.title }}</span>
                         <span class="bm-pool-sub">{{ pool.storeName || 'Dealership' }}</span>
@@ -544,6 +545,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   readonly XIcon = X;
   readonly ClockIcon = Clock;
   readonly PlusIcon = Plus;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
   readonly StoreIcon = Store;
 
   searchQuery = '';

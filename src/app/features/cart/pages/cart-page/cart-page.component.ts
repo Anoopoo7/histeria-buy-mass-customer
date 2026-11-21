@@ -20,6 +20,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { FormattedCart, SubmittedCartsPagination } from '../../../../core/models/cart.model';
 import { CartService } from '../../../../core/services/cart.service';
 import { TranslationService } from '../../../../core/services/translation.service';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 @Component({
   selector: 'bm-cart-page',
@@ -110,9 +111,11 @@ import { TranslationService } from '../../../../core/services/translation.servic
                   @for (item of cart.items; track item.productId) {
                     <div class="bm-item-row">
                       <img
-                        [src]="item.image || '/favicon.ico'"
+                        [src]="item.image || vehiclePlaceholder"
                         [alt]="item.name"
                         class="bm-item-thumb"
+                        loading="lazy"
+                        decoding="async"
                       />
 
                       <div class="bm-item-details">
@@ -288,9 +291,11 @@ import { TranslationService } from '../../../../core/services/translation.servic
                   @for (item of cart.items; track item.productId) {
                     <div class="bm-item-row is-readonly">
                       <img
-                        [src]="item.image || '/favicon.ico'"
+                        [src]="item.image || vehiclePlaceholder"
                         [alt]="item.name"
                         class="bm-item-thumb"
+                        loading="lazy"
+                        decoding="async"
                       />
 
                       <div class="bm-item-details">
@@ -940,6 +945,7 @@ export class CartPageComponent implements OnInit {
   readonly ChevronLeftIcon = ChevronLeft;
   readonly ChevronRightIcon = ChevronRight;
   readonly TrashIcon = Trash2;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
   readonly PlusIcon = Plus;
   readonly MinusIcon = Minus;
   readonly SparklesIcon = Sparkles;

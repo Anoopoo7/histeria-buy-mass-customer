@@ -29,6 +29,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { TranslationService } from '../../../../core/services/translation.service';
 import { CountdownTimerComponent } from '../../../../shared/ui/countdown-timer/countdown-timer.component';
 import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-progress.component';
+import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 
 @Component({
   selector: 'bm-product-detail-page',
@@ -86,9 +87,11 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
         <div class="bm-gallery-box">
           <div class="bm-main-img-wrapper" (click)="openLightbox(activeImage())">
             <img
-              [src]="activeImage() || prod.primaryImageUrl || '/favicon.ico'"
+              [src]="activeImage() || prod.primaryImageUrl || vehiclePlaceholder"
               [alt]="prod.name"
               class="bm-main-gallery-img"
+              fetchpriority="high"
+              decoding="async"
             />
 
             <!-- Discount percentage chip overlay -->
@@ -111,7 +114,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
                   [class.is-selected]="activeImage() === img"
                   (click)="activeImage.set(img)"
                 >
-                  <img [src]="img" [alt]="prod.name" class="bm-thumb-img" />
+                  <img [src]="img" [alt]="prod.name" class="bm-thumb-img" loading="lazy" decoding="async" />
                 </button>
               }
             </div>
@@ -133,6 +136,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
               [src]="lightboxUrl()"
               [alt]="prod.name"
               class="bm-lightbox-img"
+              decoding="async"
               (click)="$event.stopPropagation()"
             />
           </div>
@@ -143,7 +147,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
           <!-- Store Attribution Pill -->
           <a [routerLink]="['/stores', prod.storeId]" class="bm-store-attribution">
             @if (prod.store?.primaryImageUrl) {
-              <img [src]="prod.store?.primaryImageUrl" [alt]="prod.store?.storeName || prod.storeName" class="bm-store-avatar" />
+              <img [src]="prod.store?.primaryImageUrl" [alt]="prod.store?.storeName || prod.storeName" class="bm-store-avatar" loading="lazy" decoding="async" />
             } @else {
               <div class="bm-store-icon-bubble">
                 <lucide-icon [img]="StoreIcon" [size]="14" class="text-primary"></lucide-icon>
@@ -302,7 +306,7 @@ import { PoolProgressComponent } from '../../../../shared/ui/pool-progress/pool-
                 <div class="bm-rel-card">
                   <a [routerLink]="['/products', rel.id]" class="bm-rel-link">
                     <div class="bm-rel-img-box">
-                      <img [src]="rel.primaryImageUrl || '/favicon.ico'" [alt]="rel.name" class="bm-rel-img" loading="lazy" />
+                      <img [src]="rel.primaryImageUrl || vehiclePlaceholder" [alt]="rel.name" class="bm-rel-img" loading="lazy" decoding="async" />
                     </div>
                     <div class="bm-rel-info">
                       <h4 class="bm-rel-title">{{ rel.name }}</h4>
@@ -1227,6 +1231,7 @@ export class ProductDetailPageComponent implements OnInit {
   readonly ShieldCheckIcon = ShieldCheck;
   readonly MapPinIcon = MapPin;
   readonly CloseIcon = X;
+  readonly vehiclePlaceholder = VEHICLE_PLACEHOLDER_SVG;
 
   readonly cartCount = this.cartService.totalItemCount;
 
