@@ -140,11 +140,18 @@ import { TranslationService } from '../../../../core/services/translation.servic
           <div class="bm-pools-slider hide-scroll">
             @for (pool of pools(); track pool.id) {
               <a [routerLink]="['/pools', pool.id]" class="bm-pool-mini-card">
-                <div class="bm-pool-mini-head">
-                  <span class="bm-badge-discount">Up to {{ pool.maxDiscountPercentage || 15 }}% OFF</span>
+                @if (pool.primaryImageUrl) {
+                  <div class="bm-pool-mini-media">
+                    <img [src]="pool.primaryImageUrl" [alt]="pool.title" class="bm-pool-mini-img" loading="lazy" decoding="async" />
+                  </div>
+                }
+                <div class="bm-pool-mini-content">
+                  <div class="bm-pool-mini-head">
+                    <span class="bm-badge-discount">Up to {{ pool.maxDiscountPercentage || 15 }}% OFF</span>
+                  </div>
+                  <h3 class="bm-pool-mini-title">{{ pool.title }}</h3>
+                  <span class="bm-pool-mini-cta">Join Vehicle Deal →</span>
                 </div>
-                <h3 class="bm-pool-mini-title">{{ pool.title }}</h3>
-                <span class="bm-pool-mini-cta">Join Vehicle Deal →</span>
               </a>
             }
           </div>
@@ -932,14 +939,42 @@ import { TranslationService } from '../../../../core/services/translation.servic
 
     .bm-pool-mini-card {
       flex: 0 0 220px;
-      background-color: var(--bm-color-primary-soft);
-      border: 1px solid var(--bm-color-primary-border);
+      background-color: var(--bm-color-surface);
+      border: 1px solid var(--bm-color-border);
       border-radius: var(--bm-radius-md);
-      padding: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      box-shadow: var(--bm-shadow-xs);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--bm-shadow-sm);
+      }
+    }
+
+    .bm-pool-mini-media {
+      width: 100%;
+      height: 90px;
+      overflow: hidden;
+      background-color: #0f172a;
+    }
+
+    .bm-pool-mini-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .bm-pool-mini-content {
+      padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      text-decoration: none;
+      flex: 1;
     }
 
     .bm-badge-discount {
