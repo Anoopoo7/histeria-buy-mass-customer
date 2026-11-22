@@ -6,9 +6,11 @@ import {
   ArrowLeft,
   Car,
   CheckCircle2,
+  ChevronRight,
   Clock,
   HelpCircle,
   LucideAngularModule,
+  Plus,
   Share2,
   Sparkles,
   Store,
@@ -16,9 +18,11 @@ import {
 } from 'lucide-angular';
 import { FormattedCart } from '../../../../core/models/cart.model';
 import { PoolParticipationRecord, PoolRecord } from '../../../../core/models/pool.model';
+import { ProductRecord } from '../../../../core/models/product.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CartService } from '../../../../core/services/cart.service';
 import { PoolService } from '../../../../core/services/pool.service';
+import { ProductService } from '../../../../core/services/product.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { TranslationService } from '../../../../core/services/translation.service';
 import { CountdownTimerComponent } from '../../../../shared/ui/countdown-timer/countdown-timer.component';
@@ -113,6 +117,80 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
                 </div>
               }
             </div>
+          </div>
+
+          <!-- Vehicles in this Pool Carousel Section -->
+          <div class="bm-card bm-pool-products-card">
+            <div class="bm-pool-products-head">
+              <div class="bm-pool-products-title-group">
+                <lucide-icon [img]="CarIcon" [size]="16" class="text-primary"></lucide-icon>
+                <h3 class="bm-card-title mb-0">Vehicles in this Pool</h3>
+                @if (poolProducts().length > 0) {
+                  <span class="bm-pool-products-count">({{ poolProducts().length }})</span>
+                }
+              </div>
+              <a
+                [routerLink]="['/stores', p.storeId]"
+                [queryParams]="{ tab: 'products' }"
+                class="bm-view-all-link"
+              >
+                <span>View All</span>
+                <lucide-icon [img]="ChevronRightIcon" [size]="14"></lucide-icon>
+              </a>
+            </div>
+
+            @if (isLoadingPoolProducts()) {
+              <div class="bm-pool-carousel-slider hide-scroll">
+                @for (i of [1, 2, 3]; track i) {
+                  <div class="bm-pool-prod-card is-skeleton">
+                    <div class="bm-skeleton bm-pool-prod-skeleton-img"></div>
+                    <div class="bm-pool-prod-info">
+                      <div class="bm-skeleton" style="width: 70%; height: 14px; margin-bottom: 6px;"></div>
+                      <div class="bm-skeleton" style="width: 40%; height: 14px; margin-bottom: 8px;"></div>
+                      <div class="bm-skeleton" style="width: 100%; height: 28px; border-radius: var(--bm-radius-sm);"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else if (poolProducts().length > 0) {
+              <div class="bm-pool-carousel-slider hide-scroll">
+                @for (prod of poolProducts(); track prod.id) {
+                  <div class="bm-pool-prod-card">
+                    <a [routerLink]="['/products', prod.id]" class="bm-pool-prod-media">
+                      <img
+                        [src]="prod.primaryImageUrl || vehiclePlaceholder"
+                        [alt]="prod.name"
+                        class="bm-pool-prod-img"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <span class="bm-pool-prod-badge">
+                        Up to {{ p.maxDiscountPercentage || 15 }}% Off
+                      </span>
+                    </a>
+                    <div class="bm-pool-prod-info">
+                      <a [routerLink]="['/products', prod.id]" class="bm-pool-prod-title">
+                        {{ prod.name }}
+                      </a>
+                      <div class="bm-pool-prod-price-box">
+                        <span class="bm-pool-prod-price">₹{{ prod.price | number }}</span>
+                        <span class="bm-pool-prod-unit">/ {{ prod.unit || 'vehicle' }}</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="bm-pool-prod-add-btn"
+                        (click)="addProductToCart(prod)"
+                      >
+                        <lucide-icon [img]="PlusIcon" [size]="13"></lucide-icon>
+                        <span>Book</span>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="bm-empty-text">No vehicles currently listed for this pool.</p>
+            }
           </div>
 
           <!-- Eligible Cart Items Supporting This Pool -->
@@ -498,6 +576,185 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
     .bm-tier-cond {
       font-size: 11px;
       color: var(--bm-color-text-muted);
+    }
+
+    /* Vehicles in this Pool Carousel */
+    .bm-pool-products-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bm-pool-products-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .bm-pool-products-title-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bm-card-title.mb-0 {
+      margin-bottom: 0;
+    }
+
+    .bm-pool-products-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bm-color-text-secondary);
+    }
+
+    .bm-view-all-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--bm-color-primary);
+      text-decoration: none;
+      padding: 3px 6px;
+      border-radius: var(--bm-radius-sm);
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--bm-color-primary-soft);
+      }
+    }
+
+    .bm-pool-carousel-slider {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 4px;
+    }
+
+    .bm-pool-prod-card {
+      flex: 0 0 165px;
+      width: 165px;
+      background-color: var(--bm-color-surface-subtle);
+      border: 1px solid var(--bm-color-border);
+      border-radius: var(--bm-radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      scroll-snap-align: start;
+
+      &.is-skeleton {
+        pointer-events: none;
+      }
+    }
+
+    .bm-pool-prod-media {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      display: block;
+      overflow: hidden;
+      background-color: #0f172a;
+    }
+
+    .bm-pool-prod-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: scale(1.04);
+      }
+    }
+
+    .bm-pool-prod-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background-color: var(--bm-color-primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--bm-radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .bm-pool-prod-info {
+      padding: 8px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .bm-pool-prod-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bm-color-text-primary);
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+
+      &:hover {
+        color: var(--bm-color-primary);
+      }
+    }
+
+    .bm-pool-prod-price-box {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+
+    .bm-pool-prod-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--bm-color-text-primary);
+    }
+
+    .bm-pool-prod-unit {
+      font-size: 10px;
+      color: var(--bm-color-text-muted);
+    }
+
+    .bm-pool-prod-add-btn {
+      margin-top: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 28px;
+      background-color: var(--bm-color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--bm-radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--bm-color-primary-hover);
+      }
+    }
+
+    .bm-pool-prod-skeleton-img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+    }
+
+    .bm-empty-text {
+      font-size: 12px;
+      color: var(--bm-color-text-muted);
+      margin: 0;
+      padding: 8px 0;
     }
 
     .bm-explainer-card {
@@ -897,6 +1154,7 @@ import { VEHICLE_PLACEHOLDER_SVG } from '../../../../core/utils/image.utils';
 })
 export class PoolDetailPageComponent implements OnInit {
   private readonly poolService = inject(PoolService);
+  private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -910,9 +1168,13 @@ export class PoolDetailPageComponent implements OnInit {
   readonly HelpCircleIcon = HelpCircle;
   readonly CheckCircleIcon = CheckCircle2;
   readonly CarIcon = Car;
+  readonly ChevronRightIcon = ChevronRight;
+  readonly PlusIcon = Plus;
 
   readonly pool = signal<PoolRecord | null>(null);
   readonly myParticipation = signal<PoolParticipationRecord | null>(null);
+  readonly poolProducts = signal<ProductRecord[]>([]);
+  readonly isLoadingPoolProducts = signal<boolean>(false);
 
   // Reactive matching store cart from CartService
   readonly matchingStoreCart = computed(() => {
@@ -960,6 +1222,7 @@ export class PoolDetailPageComponent implements OnInit {
       next: (p) => {
         if (p) {
           this.pool.set(p);
+          this.loadPoolProducts(p);
 
           // If logged in, fetch participation
           if (this.auth.isAuthenticated()) {
@@ -971,6 +1234,38 @@ export class PoolDetailPageComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false),
+    });
+  }
+
+  loadPoolProducts(pool: PoolRecord): void {
+    if (!pool.storeId) return;
+    this.isLoadingPoolProducts.set(true);
+    this.productService.getProducts({ storeId: pool.storeId, limit: 30, ignoreLocation: true }).subscribe({
+      next: (res) => {
+        const all = res?.products || [];
+        if (pool.productIds && pool.productIds.length > 0) {
+          const matched = all.filter((prod) => pool.productIds.includes(prod.id));
+          this.poolProducts.set(matched.length > 0 ? matched : all.slice(0, 6));
+        } else {
+          this.poolProducts.set(all.slice(0, 6));
+        }
+        this.isLoadingPoolProducts.set(false);
+      },
+      error: () => {
+        this.isLoadingPoolProducts.set(false);
+      },
+    });
+  }
+
+  addProductToCart(prod: ProductRecord): void {
+    this.cartService.addItem(prod.id, 1, prod).subscribe({
+      next: () => {
+        const p = this.pool();
+        if (p?.storeId) {
+          // ensure cart data updates reactively
+          this.cartService.loadCarts().subscribe();
+        }
+      },
     });
   }
 

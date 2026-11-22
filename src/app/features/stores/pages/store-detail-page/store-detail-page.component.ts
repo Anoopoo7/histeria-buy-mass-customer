@@ -129,9 +129,41 @@ import { TranslationService } from '../../../../core/services/translation.servic
         }
       </div>
 
-      <!-- 2 Tabs: Location & Store Photos Grid -->
+      <!-- Active Group-Buying Deals for this Store -->
+      @if (pools().length > 0) {
+        <section class="bm-store-pools-section">
+          <div class="bm-sec-header">
+            <lucide-icon [img]="SparklesIcon" [size]="16" class="text-primary"></lucide-icon>
+            <h2 class="bm-sec-title">Showroom Group-Buying Campaigns</h2>
+          </div>
+
+          <div class="bm-pools-slider hide-scroll">
+            @for (pool of pools(); track pool.id) {
+              <a [routerLink]="['/pools', pool.id]" class="bm-pool-mini-card">
+                <div class="bm-pool-mini-head">
+                  <span class="bm-badge-discount">Up to {{ pool.maxDiscountPercentage || 15 }}% OFF</span>
+                </div>
+                <h3 class="bm-pool-mini-title">{{ pool.title }}</h3>
+                <span class="bm-pool-mini-cta">Join Vehicle Deal →</span>
+              </a>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- 3 Tabs: Vehicles, Location & Route, Showroom Photos -->
       <section class="bm-store-tabs-section">
         <div class="bm-segment-tabs">
+          <button
+            type="button"
+            class="bm-segment-tab"
+            [class.is-active]="activeStoreTab() === 'products'"
+            (click)="setActiveStoreTab('products')"
+          >
+            <lucide-icon [img]="CarIcon" [size]="15"></lucide-icon>
+            <span>Vehicles</span>
+          </button>
+
           <button
             type="button"
             class="bm-segment-tab"
@@ -153,7 +185,63 @@ import { TranslationService } from '../../../../core/services/translation.servic
           </button>
         </div>
 
-        <!-- TAB 1: Location & Non-changeable Driving/Bike Route -->
+        <!-- TAB 1: Vehicles Available at this Showroom -->
+        @if (activeStoreTab() === 'products') {
+          <div class="bm-card bm-store-products-card">
+            <div class="bm-tab-card-header">
+              <h2 class="bm-sec-title">Vehicles Available at this Showroom</h2>
+              <span class="bm-tab-card-subtitle" *ngIf="products().length > 0">
+                {{ products().length }} model{{ products().length > 1 ? 's' : '' }} ready for booking
+              </span>
+            </div>
+
+            @if (isLoadingProducts()) {
+              <div class="bm-products-grid">
+                @for (i of [1, 2, 3, 4]; track i) {
+                  <div class="bm-prod-card is-skeleton">
+                    <div class="bm-prod-img-box bm-skeleton"></div>
+                    <div class="bm-prod-info">
+                      <div class="bm-skeleton bm-skeleton-title" style="width: 75%; height: 14px; margin-bottom: 4px;"></div>
+                      <div class="bm-skeleton bm-skeleton-text" style="width: 45%; height: 15px;"></div>
+                    </div>
+                    <div style="padding: 0 4px 4px;">
+                      <div class="bm-skeleton" style="height: 28px; border-radius: var(--bm-radius-sm);"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else if (products().length > 0) {
+              <div class="bm-products-grid">
+                @for (prod of products(); track prod.id) {
+                  <div class="bm-prod-card">
+                    <a [routerLink]="['/products', prod.id]" class="bm-prod-link">
+                      <div class="bm-prod-img-box">
+                        <img [src]="prod.primaryImageUrl || vehiclePlaceholder" [alt]="prod.name" class="bm-prod-img" loading="lazy" decoding="async" />
+                      </div>
+                      <div class="bm-prod-info">
+                        <h4 class="bm-prod-title">{{ prod.name }}</h4>
+                        <div class="bm-price-box">
+                          <span class="bm-price">₹{{ prod.price | number }}</span>
+                          <span class="bm-unit">/ {{ prod.unit || 'vehicle' }}</span>
+                        </div>
+                      </div>
+                    </a>
+                    <button type="button" class="bm-btn-add" (click)="addToCart(prod.id)">
+                      <lucide-icon [img]="PlusIcon" [size]="14"></lucide-icon>
+                      <span>{{ t('add_to_cart') }}</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="bm-empty-catalog">
+                <p>No vehicles currently listed for this showroom.</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- TAB 2: Location & Non-changeable Driving/Bike Route -->
         @if (activeStoreTab() === 'location') {
           <div class="bm-card bm-location-card">
             <!-- Non-changeable Route Mode Indicator (Car / Bike Fixed) -->
@@ -221,7 +309,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
           </div>
         }
 
-        <!-- TAB 2: Store Photos in Grid -->
+        <!-- TAB 3: Store Photos in Grid -->
         @if (activeStoreTab() === 'photos') {
           <div class="bm-card bm-photos-card">
             @if (storeImages().length > 0) {
@@ -271,77 +359,6 @@ import { TranslationService } from '../../../../core/services/translation.servic
           />
         </div>
       }
-
-      <!-- Active Group-Buying Deals for this Store -->
-      @if (pools().length > 0) {
-        <section class="bm-store-pools-section">
-          <div class="bm-sec-header">
-            <lucide-icon [img]="SparklesIcon" [size]="16" class="text-primary"></lucide-icon>
-            <h2 class="bm-sec-title">Showroom Group-Buying Campaigns</h2>
-          </div>
-
-          <div class="bm-pools-slider hide-scroll">
-            @for (pool of pools(); track pool.id) {
-              <a [routerLink]="['/pools', pool.id]" class="bm-pool-mini-card">
-                <div class="bm-pool-mini-head">
-                  <span class="bm-badge-discount">Up to {{ pool.maxDiscountPercentage || 15 }}% OFF</span>
-                </div>
-                <h3 class="bm-pool-mini-title">{{ pool.title }}</h3>
-                <span class="bm-pool-mini-cta">Join Vehicle Deal →</span>
-              </a>
-            }
-          </div>
-        </section>
-      }
-
-      <!-- Store Products Catalog -->
-      <section class="bm-store-products-section">
-        <h2 class="bm-sec-title">Vehicles Available at this Showroom</h2>
-
-        @if (isLoadingProducts()) {
-          <div class="bm-products-grid">
-            @for (i of [1, 2, 3, 4]; track i) {
-              <div class="bm-prod-card is-skeleton">
-                <div class="bm-prod-img-box bm-skeleton"></div>
-                <div class="bm-prod-info">
-                  <div class="bm-skeleton bm-skeleton-title" style="width: 75%; height: 14px; margin-bottom: 4px;"></div>
-                  <div class="bm-skeleton bm-skeleton-text" style="width: 45%; height: 15px;"></div>
-                </div>
-                <div style="padding: 0 4px 4px;">
-                  <div class="bm-skeleton" style="height: 28px; border-radius: var(--bm-radius-sm);"></div>
-                </div>
-              </div>
-            }
-          </div>
-        } @else if (products().length > 0) {
-          <div class="bm-products-grid">
-            @for (prod of products(); track prod.id) {
-              <div class="bm-prod-card">
-                <a [routerLink]="['/products', prod.id]" class="bm-prod-link">
-                  <div class="bm-prod-img-box">
-                    <img [src]="prod.primaryImageUrl || vehiclePlaceholder" [alt]="prod.name" class="bm-prod-img" loading="lazy" decoding="async" />
-                  </div>
-                  <div class="bm-prod-info">
-                    <h4 class="bm-prod-title">{{ prod.name }}</h4>
-                    <div class="bm-price-box">
-                      <span class="bm-price">₹{{ prod.price | number }}</span>
-                      <span class="bm-unit">/ {{ prod.unit || 'vehicle' }}</span>
-                    </div>
-                  </div>
-                </a>
-                <button type="button" class="bm-btn-add" (click)="addToCart(prod.id)">
-                  <lucide-icon [img]="PlusIcon" [size]="14"></lucide-icon>
-                  <span>{{ t('add_to_cart') }}</span>
-                </button>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="bm-empty-catalog">
-            <p>No vehicles currently listed for this showroom.</p>
-          </div>
-        }
-      </section>
 
       <!-- Store Cart Sticky Bar if customer has items in this store's cart -->
       @if (currentStoreCart(); as storeCart) {
@@ -547,7 +564,7 @@ import { TranslationService } from '../../../../core/services/translation.servic
 
     .bm-segment-tabs {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
       background-color: var(--bm-color-surface-subtle);
       padding: 4px;
@@ -559,15 +576,16 @@ import { TranslationService } from '../../../../core/services/translation.servic
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 8px 10px;
+      gap: 5px;
+      padding: 8px 6px;
       border: none;
       border-radius: var(--bm-radius-sm);
       background-color: transparent;
       color: var(--bm-color-text-secondary);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
       transition: all 0.15s ease;
 
       &.is-active {
@@ -575,6 +593,19 @@ import { TranslationService } from '../../../../core/services/translation.servic
         color: var(--bm-color-primary);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
       }
+    }
+
+    .bm-tab-card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 12px;
+    }
+
+    .bm-tab-card-subtitle {
+      font-size: 11px;
+      color: var(--bm-color-text-muted);
+      font-weight: 500;
     }
 
     .bm-card {
@@ -1120,8 +1151,8 @@ export class StoreDetailPageComponent implements OnInit, AfterViewInit, OnDestro
   readonly isLoadingProducts = signal<boolean>(true);
   readonly currentStoreCart = signal<any>(null);
 
-  // Active section tab: 'location' or 'photos'
-  readonly activeStoreTab = signal<'location' | 'photos'>('location');
+  // Active section tab: 'products', 'location' or 'photos'
+  readonly activeStoreTab = signal<'products' | 'location' | 'photos'>('products');
   readonly previewPhotoUrl = signal<string | null>(null);
 
   // Carousel state
@@ -1172,6 +1203,13 @@ export class StoreDetailPageComponent implements OnInit, AfterViewInit, OnDestro
         this.loadStoreDetails(storeId);
       }
     });
+
+    this.route.queryParams.subscribe((queryParams) => {
+      const tab = queryParams['tab'];
+      if (tab === 'products' || tab === 'location' || tab === 'photos') {
+        this.setActiveStoreTab(tab);
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -1188,7 +1226,7 @@ export class StoreDetailPageComponent implements OnInit, AfterViewInit, OnDestro
     this.mapInstance = null;
   }
 
-  setActiveStoreTab(tab: 'location' | 'photos'): void {
+  setActiveStoreTab(tab: 'products' | 'location' | 'photos'): void {
     this.activeStoreTab.set(tab);
     if (tab === 'location') {
       setTimeout(() => this.initDirectionsMap(), 150);
